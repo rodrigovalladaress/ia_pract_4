@@ -2,10 +2,6 @@
 int main(void)
 {
   char nombre_fichero[] = "BPP10.txt";
-  int n_casos = 0;
   GRUPO_CONTENEDORES grupo_contenedores(nombre_fichero);
-  /*
-  ifstream flujo;
-  flujo.open(nombre_fichero);
-  */
+  grupo_contenedores.mostrar_contenido_ficheros();
 }

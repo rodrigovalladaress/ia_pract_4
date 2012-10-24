@@ -14,6 +14,11 @@ private:
   string nombre_instancia;
   vector<int> contenedor;
 public:
+  int get_n_objetos(void);
+  int get_capacidad(void);
+  int get_n_contenedores_optimo(void);
+  int get_objeto(int);
+  string get_nombre_instancia(void);
   void leer_fichero(ifstream&);
   CONTENEDOR(void);
 };
@@ -23,5 +28,6 @@ private:
   int n_casos;
   CONTENEDOR* contenedor;
 public:
+  void mostrar_contenido_ficheros(void);
   GRUPO_CONTENEDORES(char*);
 };
