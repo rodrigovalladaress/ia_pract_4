@@ -1,4 +1,8 @@
 #include "pract_4.h"
+void CONTENEDOR::ordenar_objetos(int)
+{
+  
+}
 int CONTENEDOR::get_n_objetos(void)
 {
   return n_objetos;
@@ -38,7 +42,11 @@ CONTENEDOR::CONTENEDOR(void)
 }
 
 
-
+void GRUPO_CONTENEDORES::ordenar_objetos_de_contenedor(int opcion)
+{
+  //if(opcion == MAYOR_MENOR)
+    
+}
 void GRUPO_CONTENEDORES::mostrar_contenido_ficheros(void)
 {
   int salto_linea;

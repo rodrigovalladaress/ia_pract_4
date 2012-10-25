@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#define ALEATORIO 0
+#define MAYOR_MENOR 1
 using namespace std;
 //psar flujos con &
 class CONTENEDOR
@@ -14,6 +16,7 @@ private:
   string nombre_instancia;
   vector<int> contenedor;
 public:
+  void ordenar_objetos(int);
   int get_n_objetos(void);
   int get_capacidad(void);
   int get_n_contenedores_optimo(void);
@@ -28,6 +31,7 @@ private:
   int n_casos;
   CONTENEDOR* contenedor;
 public:
+  void ordenar_objetos_de_contenedor(int);
   void mostrar_contenido_ficheros(void);
   GRUPO_CONTENEDORES(char*);
 };
