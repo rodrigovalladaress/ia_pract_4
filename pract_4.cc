@@ -1,13 +1,44 @@
 #include "pract_4.h"
-void CONTENEDOR::ordenar_aleatoriamente(void)
+bool INSTANCIA::cabe_en_contenedor(int i, int cont)
+{
+  return espacio_sobrante_contenedor(cont) >= objeto[i] ? true : false;
+}
+int INSTANCIA::espacio_sobrante_contenedor(int cont)
+{
+  return capacidad - contenedor[cont];
+}
+void INSTANCIA::meter_en_contenedor(int i, int cont)
+{
+  if(cabe_en_contenedor(i, cont) == true)
+    contenedor[i] += objeto[i];
+  else
+    cout << "Error en las capacidades de los contenedores." << endl;
+}
+void INSTANCIA::antes_que_quepa(void)
+{
+  unsigned pos_contenedor = 0;
+  contenedor.push_back(0);
+  for(int i = 0; i < n_objetos; i++)
+  {
+    while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false))
+      pos_contenedor++;
+    if(pos_contenedor == contenedor.size())
+      contenedor.push_back(objeto[i]); //Creación de un nuevo contenedor
+    else
+      meter_en_contenedor(objeto[i], pos_contenedor);
+  }
+}
+void INSTANCIA::ordenar_aleatoriamente(void)
 {
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
   srand(time(NULL));
   while((i < n_objetos)&&(j > 0)) {
+    //Se ordena aleatoriamente el vector de abajo a arriba
     pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
     aux = objeto[i];
     objeto[i] = objeto[pos_swap];
     objeto[pos_swap] = aux;
+    //Se ordena aleatoriamente el vector de arriba a abajo
     pos_swap = rand() % j;
     aux = objeto[j];
     objeto[j] = objeto[pos_swap];
@@ -16,31 +47,55 @@ void CONTENEDOR::ordenar_aleatoriamente(void)
     j--;
   }
 }
-void CONTENEDOR::ordenar_mayor_menor(void)
+void INSTANCIA::ordenar_mayor_menor(int primero_desordenado/*= 0*/)
 {
-  
+  int pos, aux;  
+  if(primero_desordenado < n_objetos) {
+    pos = 0;
+    while(objeto[primero_desordenado] > objeto[pos])
+      pos++;
+    for(int i = pos; i < primero_desordenado; i++)
+    {
+      aux = objeto[i];
+      objeto[i] = objeto[primero_desordenado];
+      objeto[primero_desordenado] = aux;
+    }
+    ordenar_mayor_menor(primero_desordenado + 1);
+  }
 }
-int CONTENEDOR::get_n_objetos(void)
+int INSTANCIA::get_n_objetos(void)
 {
   return n_objetos;
 }
-int CONTENEDOR::get_capacidad(void)
+int INSTANCIA::get_capacidad(void)
 {
   return capacidad;
 }
-int CONTENEDOR::get_n_contenedores_optimo(void)
+int INSTANCIA::get_n_contenedores_optimo(void)
 {
   return n_contenedores_optimo;
 }
-int CONTENEDOR::get_objeto(int i)
+int INSTANCIA::get_objeto(int i)
 {
   return objeto[i];
 }
-string CONTENEDOR::get_nombre_instancia(void)
+string INSTANCIA::get_nombre_instancia(void)
 {
   return nombre_instancia;
 }
-void CONTENEDOR::leer_fichero(ifstream &flujo)
+void INSTANCIA::imprimir_objetos(int columnas/*= 9*/)
+{
+  int salto_linea = 0;
+  for(int i = 0; i < n_objetos; i++) {
+    cout << objeto[i] << "\t";
+    salto_linea++;
+    if(salto_linea > columnas) {
+      cout << endl;
+      salto_linea = 0;
+    }
+  }
+}
+void INSTANCIA::leer_fichero(ifstream &flujo)
 { 
   int aux;
   flujo >> nombre_instancia;
@@ -52,46 +107,48 @@ void CONTENEDOR::leer_fichero(ifstream &flujo)
     objeto.push_back(aux);
   }
 }
-CONTENEDOR::CONTENEDOR(void)
+INSTANCIA::INSTANCIA(void)
 {
   n_objetos = 0;
   nombre_instancia = '0';
   objeto_en_contenedor = NULL;
 }
-void GRUPO_CONTENEDORES::ordenar_aleatoriamente(int i)
+
+
+void GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
 {
-  contenedor[i].ordenar_aleatoriamente();
+  instancia[i].antes_que_quepa();
 }
-void GRUPO_CONTENEDORES::ordenar_mayor_menor(int i)
+void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 {
-  contenedor[i].ordenar_mayor_menor();
+  instancia[i].ordenar_aleatoriamente();
 }
-void GRUPO_CONTENEDORES::mostrar_contenido_ficheros(void)
+void GRUPO_INSTANCIAS::ordenar_mayor_menor(int i)
 {
-  int salto_linea;
-  CONTENEDOR* p;
+  instancia[i].ordenar_mayor_menor();
+}
+void GRUPO_INSTANCIAS::mostrar_contenido_instancia(int i)
+{
+  instancia[i].imprimir_objetos();
+}
+void GRUPO_INSTANCIAS::mostrar_contenido_ficheros(void)
+{
+  INSTANCIA* p;
   cout << "Número de casos = " << n_casos << endl;
   for(int i = 0; i < n_casos; i++)
   {
-    salto_linea = 0;
     cout << "----------------------------------------------------------------------------" << endl;
-    p = &contenedor[i];
+    cout << endl;
+    p = &instancia[i];
     cout << p->get_nombre_instancia() << endl;
     cout << "c = " << p->get_capacidad() << " i = " << p->get_n_objetos() << endl;
     cout << "Contenedores óptimos = " << p->get_n_contenedores_optimo() << endl;
     cout << endl;
-    for(int j = 0; j < p->get_n_objetos(); j++) {
-      cout << p->get_objeto(j) << "\t";
-      salto_linea++;
-      if(salto_linea > 9) {
-	cout << endl;
-	salto_linea = 0;
-      }
-    }
+    p->imprimir_objetos();
   }
   cout << "----------------------------------------------------------------------------" << endl;
 }
-GRUPO_CONTENEDORES::GRUPO_CONTENEDORES(char *nombre_fichero)
+GRUPO_INSTANCIAS::GRUPO_INSTANCIAS(char *nombre_fichero)
 {
   cout << "nombre_fichero = " << nombre_fichero << endl;
   ifstream flujo;
@@ -100,9 +157,9 @@ GRUPO_CONTENEDORES::GRUPO_CONTENEDORES(char *nombre_fichero)
     cout << "Error al abrir el fichero." << endl;
   else {
     flujo >> n_casos;
-    contenedor = new CONTENEDOR[n_casos];
+    instancia = new INSTANCIA[n_casos];
     cout << "n_casos = " << n_casos << endl;
-    for(int i = 0; i < n_casos; i++) //pasar el flujo a cada constructor de contenedor
-      contenedor[i].leer_fichero(flujo);
+    for(int i = 0; i < n_casos; i++) //pasar el flujo a cada constructor de instancia
+      instancia[i].leer_fichero(flujo);
   }
 }

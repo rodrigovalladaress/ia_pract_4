@@ -2,7 +2,8 @@
 int main(void)
 {
   char nombre_fichero[] = "BPP10.txt";
-  GRUPO_CONTENEDORES grupo_contenedores(nombre_fichero);
-  //grupo_contenedores.mostrar_contenido_ficheros();
-  grupo_contenedores.ordenar_aleatoriamente(2);
+  GRUPO_INSTANCIAS grupo_instancias(nombre_fichero);
+  //grupo_instancias.mostrar_contenido_ficheros();
+  grupo_instancias.ordenar_aleatoriamente(9);
+  //grupo_instancias.mostrar_contenido_instancia(9);
 }
