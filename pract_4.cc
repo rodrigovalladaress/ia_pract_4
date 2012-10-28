@@ -7,25 +7,34 @@ int INSTANCIA::espacio_sobrante_contenedor(int cont)
 {
   return capacidad - contenedor[cont];
 }
+void INSTANCIA::nuevo_contenedor(int i)
+{
+  contenedor.push_back(objeto[i]);
+  objeto_en_contenedor[i] = contenedor.size() - 1;
+}
 void INSTANCIA::meter_en_contenedor(int i, int cont)
 {
-  if(cabe_en_contenedor(i, cont) == true)
-    contenedor[i] += objeto[i];
-  else
+  if(cabe_en_contenedor(i, cont) == true) {
+    contenedor[cont] += objeto[i];
+    objeto_en_contenedor[i] = cont;
+  }
+  else {
     cout << "Error en las capacidades de los contenedores." << endl;
+    cout << "objeto[i] = " << objeto[i] << endl;
+  }
 }
 void INSTANCIA::antes_que_quepa(void)
 {
   unsigned pos_contenedor = 0;
-  contenedor.push_back(0);
+  contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
   {
     while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false))
       pos_contenedor++;
     if(pos_contenedor == contenedor.size())
-      contenedor.push_back(objeto[i]); //Creación de un nuevo contenedor
+      nuevo_contenedor(i);
     else
-      meter_en_contenedor(objeto[i], pos_contenedor);
+      meter_en_contenedor(i, pos_contenedor);
   }
 }
 void INSTANCIA::ordenar_aleatoriamente(void)
@@ -83,6 +92,19 @@ string INSTANCIA::get_nombre_instancia(void)
 {
   return nombre_instancia;
 }
+void INSTANCIA::imprimir_contenedores(void)
+{
+  for(unsigned i = 0; i < contenedor.size(); i++)
+  {
+    cout << "Contenedor [" << i << "] (" << espacio_sobrante_contenedor(i) << ")" << endl;
+    cout << endl;
+    for(int j = 0; j < n_objetos; j++)
+      if(objeto_en_contenedor[j] == i)
+	cout << objeto[j] << endl;
+    cout << "---------------------" << endl;
+  }
+  cout << "Número de contenedores óptimo = " << n_contenedores_optimo << endl;
+}
 void INSTANCIA::imprimir_objetos(int columnas/*= 9*/)
 {
   int salto_linea = 0;
@@ -101,6 +123,7 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
   flujo >> nombre_instancia;
   flujo >> capacidad;
   flujo >> n_objetos;
+  objeto_en_contenedor = new int[n_objetos];
   flujo >> n_contenedores_optimo;
   for(int i = 0; i < n_objetos; i++) {
     flujo >> aux;
@@ -126,6 +149,10 @@ void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 void GRUPO_INSTANCIAS::ordenar_mayor_menor(int i)
 {
   instancia[i].ordenar_mayor_menor();
+}
+void GRUPO_INSTANCIAS::mostrar_contenedores_instancia(int i)
+{
+  instancia[i].imprimir_contenedores();
 }
 void GRUPO_INSTANCIAS::mostrar_contenido_instancia(int i)
 {

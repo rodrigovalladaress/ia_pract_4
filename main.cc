@@ -6,4 +6,6 @@ int main(void)
   //grupo_instancias.mostrar_contenido_ficheros();
   grupo_instancias.ordenar_aleatoriamente(9);
   //grupo_instancias.mostrar_contenido_instancia(9);
+  grupo_instancias.meter_antes_que_quepa(9);
+  grupo_instancias.mostrar_contenedores_instancia(9);
 }
