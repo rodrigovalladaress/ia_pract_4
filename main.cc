@@ -3,7 +3,7 @@ int main(void)
 {
   char nombre_fichero[] = "BPP10.txt";
   int inst;
-  float time;
+  int time;
   GRUPO_INSTANCIAS grupo_instancias(nombre_fichero);
   //grupo_instancias.mostrar_contenido_ficheros();
   grupo_instancias.ordenar_aleatoriamente(9);

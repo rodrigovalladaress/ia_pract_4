@@ -42,6 +42,31 @@ int INSTANCIA::antes_que_quepa(void)
   }
   return num_instrucciones;
 }
+int INSTANCIA::menos_espacio_deje(void)
+{
+  unsigned pos_contenedor = INF;
+  int num_instrucciones = 0, min_espacio = INF;
+  contenedor.clear();
+  for(int i = 0; i < n_objetos; i++)
+  {
+    for(int j = 0; j < contenedor.size(); j++)
+    {
+      if((cabe_en_contenedor(i, pos_contenedor) == true)
+	  &&(min_espacio > espacio_sobrante_contenedor(j))) {
+	min_espacio = espacio_sobrante_contenedor(j);
+	pos_contenedor = j;
+	num_instrucciones++;
+      }
+      num_instrucciones++;
+    }
+    if(pos_contenedor == INF)
+      nuevo_contenedor(i);
+    else
+      meter_en_contenedor(i, pos_contenedor);
+    num_instrucciones++;
+  }
+  return num_instrucciones;
+}
 void INSTANCIA::ordenar_aleatoriamente(void)
 {
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
@@ -142,7 +167,7 @@ INSTANCIA::INSTANCIA(void)
   objeto_en_contenedor = NULL;
 }
 
-void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, float& tiempo)
+void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, int& tiempo)
 {
   cronousec(1);
   num_instrucciones = meter_antes_que_quepa(i);

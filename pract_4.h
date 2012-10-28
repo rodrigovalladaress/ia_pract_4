@@ -3,10 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
-#define ALEATORIO 0
-#define MAYOR_MENOR 1
+#define INF 4000
 using namespace std;
-//psar flujos con &
 class INSTANCIA
 {
 private:
@@ -23,7 +21,7 @@ private:
   inline void meter_en_contenedor(int, int);
 public:
   int antes_que_quepa(void);
-  void menos_espacio_deje(void);
+  int menos_espacio_deje(void);
   void ordenar_aleatoriamente(void);
   void ordenar_mayor_menor(int primero_desordenado = 0);
   inline int get_n_objetos(void);
@@ -42,7 +40,12 @@ private:
   int n_casos;
   INSTANCIA* instancia;
 public:
-  void estadistica_antes_que_quepa(int, int&, float&);
+  void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
+  //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
+  
+  //Crear una funcion estadistica que calcule varios ejemplos
+  //en los ejemplos se comprueba el numero de contenedores
+  //con el numero de contenedores óptimo
   inline int meter_antes_que_quepa(int);
   inline void ordenar_aleatoriamente(int);
   inline void ordenar_mayor_menor(int);
