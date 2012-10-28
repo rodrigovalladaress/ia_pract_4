@@ -1,7 +1,20 @@
 #include "pract_4.h"
 void CONTENEDOR::ordenar_aleatoriamente(void)
 {
-  
+  int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
+  srand(time(NULL));
+  while((i < n_objetos)&&(j > 0)) {
+    pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
+    aux = objeto[i];
+    objeto[i] = objeto[pos_swap];
+    objeto[pos_swap] = aux;
+    pos_swap = rand() % j;
+    aux = objeto[j];
+    objeto[j] = objeto[pos_swap];
+    objeto[pos_swap] = aux;
+    i++;
+    j--;
+  }
 }
 void CONTENEDOR::ordenar_mayor_menor(void)
 {

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <stdlib.h>
 #define ALEATORIO 0
 #define MAYOR_MENOR 1
 using namespace std;
