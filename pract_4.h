@@ -11,12 +11,13 @@ private:
   int n_objetos;
   int capacidad;
   int n_contenedores_optimo;
-  int* objeto;
+  vector<int> objeto;
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
 public:
-  void ordenar_objetos(int);
+  void ordenar_aleatoriamente(void);
+  void ordenar_mayor_menor(void);
   int get_n_objetos(void);
   int get_capacidad(void);
   int get_n_contenedores_optimo(void);
@@ -31,7 +32,8 @@ private:
   int n_casos;
   CONTENEDOR* contenedor;
 public:
-  void ordenar_objetos_de_contenedor(int);
+  void ordenar_aleatoriamente(int);
+  void ordenar_mayor_menor(int);
   void mostrar_contenido_ficheros(void);
   GRUPO_CONTENEDORES(char*);
 };

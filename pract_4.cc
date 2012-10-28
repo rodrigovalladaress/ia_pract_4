@@ -1,5 +1,9 @@
 #include "pract_4.h"
-void CONTENEDOR::ordenar_objetos(int)
+void CONTENEDOR::ordenar_aleatoriamente(void)
+{
+  
+}
+void CONTENEDOR::ordenar_mayor_menor(void)
 {
   
 }
@@ -25,27 +29,29 @@ string CONTENEDOR::get_nombre_instancia(void)
 }
 void CONTENEDOR::leer_fichero(ifstream &flujo)
 { 
+  int aux;
   flujo >> nombre_instancia;
   flujo >> capacidad;
   flujo >> n_objetos;
-  objeto = new int[n_objetos];
   flujo >> n_contenedores_optimo;
-  for(int i = 0; i < n_objetos; i++)
-    flujo >> objeto[i];
+  for(int i = 0; i < n_objetos; i++) {
+    flujo >> aux;
+    objeto.push_back(aux);
+  }
 }
 CONTENEDOR::CONTENEDOR(void)
 {
   n_objetos = 0;
-  objeto = NULL;
   nombre_instancia = '0';
   objeto_en_contenedor = NULL;
 }
-
-
-void GRUPO_CONTENEDORES::ordenar_objetos_de_contenedor(int opcion)
+void GRUPO_CONTENEDORES::ordenar_aleatoriamente(int i)
 {
-  //if(opcion == MAYOR_MENOR)
-    
+  contenedor[i].ordenar_aleatoriamente();
+}
+void GRUPO_CONTENEDORES::ordenar_mayor_menor(int i)
+{
+  contenedor[i].ordenar_mayor_menor();
 }
 void GRUPO_CONTENEDORES::mostrar_contenido_ficheros(void)
 {
