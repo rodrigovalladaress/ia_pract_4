@@ -42,11 +42,12 @@ private:
 public:
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
-  
+  void estadistica_menos_espacio_deje(int, int&, int&);
   //Crear una funcion estadistica que calcule varios ejemplos
   //en los ejemplos se comprueba el numero de contenedores
   //con el numero de contenedores óptimo
   inline int meter_antes_que_quepa(int);
+  inline int meter_menos_espacio_deje(int);
   inline void ordenar_aleatoriamente(int);
   inline void ordenar_mayor_menor(int);
   inline void mostrar_contenedores_instancia(int);

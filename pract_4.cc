@@ -44,14 +44,15 @@ int INSTANCIA::antes_que_quepa(void)
 }
 int INSTANCIA::menos_espacio_deje(void)
 {
-  unsigned pos_contenedor = INF;
+  unsigned pos_contenedor;
   int num_instrucciones = 0, min_espacio = INF;
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
   {
+    pos_contenedor = INF; //Si no cambia no se ha encontrado contenedor en el que quepa
     for(int j = 0; j < contenedor.size(); j++)
     {
-      if((cabe_en_contenedor(i, pos_contenedor) == true)
+      if((cabe_en_contenedor(i, j) == true)
 	  &&(min_espacio > espacio_sobrante_contenedor(j))) {
 	min_espacio = espacio_sobrante_contenedor(j);
 	pos_contenedor = j;
@@ -173,9 +174,19 @@ void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones
   num_instrucciones = meter_antes_que_quepa(i);
   tiempo = cronousec(0);
 }
+void GRUPO_INSTANCIAS::estadistica_menos_espacio_deje(int i, int& num_instrucciones, int& tiempo)
+{
+  cronousec(1);
+  num_instrucciones = meter_menos_espacio_deje(i);
+  tiempo = cronousec(0);
+}
 int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
 {
   return instancia[i].antes_que_quepa();
+}
+int GRUPO_INSTANCIAS::meter_menos_espacio_deje(int i)
+{
+  return instancia[i].menos_espacio_deje();
 }
 void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 {
