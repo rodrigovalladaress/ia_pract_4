@@ -1,3 +1,4 @@
+#include "milisegundo.cc"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -21,7 +22,7 @@ private:
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int);
 public:
-  void antes_que_quepa(void);
+  int antes_que_quepa(void);
   void menos_espacio_deje(void);
   void ordenar_aleatoriamente(void);
   void ordenar_mayor_menor(int primero_desordenado = 0);
@@ -41,11 +42,12 @@ private:
   int n_casos;
   INSTANCIA* instancia;
 public:
-  void meter_antes_que_quepa(int);
-  void ordenar_aleatoriamente(int);
-  void ordenar_mayor_menor(int);
-  void mostrar_contenedores_instancia(int);
-  void mostrar_contenido_instancia(int);
+  void estadistica_antes_que_quepa(int, int&, float&);
+  inline int meter_antes_que_quepa(int);
+  inline void ordenar_aleatoriamente(int);
+  inline void ordenar_mayor_menor(int);
+  inline void mostrar_contenedores_instancia(int);
+  inline void mostrar_contenido_instancia(int);
   void mostrar_contenido_ficheros(void);
   GRUPO_INSTANCIAS(char*);
 };

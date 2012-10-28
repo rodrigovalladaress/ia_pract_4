@@ -23,19 +23,24 @@ void INSTANCIA::meter_en_contenedor(int i, int cont)
     cout << "objeto[i] = " << objeto[i] << endl;
   }
 }
-void INSTANCIA::antes_que_quepa(void)
+int INSTANCIA::antes_que_quepa(void)
 {
   unsigned pos_contenedor = 0;
+  int num_instrucciones = 0;
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
   {
-    while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false))
+    while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false)) {
       pos_contenedor++;
+      num_instrucciones++;
+    }
     if(pos_contenedor == contenedor.size())
       nuevo_contenedor(i);
     else
       meter_en_contenedor(i, pos_contenedor);
+    num_instrucciones++;
   }
+  return num_instrucciones;
 }
 void INSTANCIA::ordenar_aleatoriamente(void)
 {
@@ -137,10 +142,15 @@ INSTANCIA::INSTANCIA(void)
   objeto_en_contenedor = NULL;
 }
 
-
-void GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
+void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, float& tiempo)
 {
-  instancia[i].antes_que_quepa();
+  cronousec(1);
+  num_instrucciones = meter_antes_que_quepa(i);
+  tiempo = cronousec(0);
+}
+int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
+{
+  return instancia[i].antes_que_quepa();
 }
 void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 {
