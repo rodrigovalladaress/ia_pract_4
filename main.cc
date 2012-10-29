@@ -11,10 +11,7 @@ int main(void)
   //grupo_instancias.meter_antes_que_quepa(9);
   //grupo_instancias.mostrar_contenedores_instancia(9);
   //grupo_instancias.estadistica_antes_que_quepa(9, inst, time);
-  grupo_instancias.estadistica_menos_espacio_deje(9, inst, time);
-  cout << "inst = " << inst << endl;
-  cout << "time = " << time << endl;
-  grupo_instancias.estadistica_antes_que_quepa(9, inst, time);
-  cout << "inst = " << inst << endl;
-  cout << "time = " << time << endl;
+  //grupo_instancias.ordenar_mayor_menor(6);
+  //grupo_instancias.meter_menos_espacio_deje(6);
+  grupo_instancias.estadistica_num_contenedores();
 }

@@ -23,7 +23,9 @@ public:
   int antes_que_quepa(void);
   int menos_espacio_deje(void);
   void ordenar_aleatoriamente(void);
-  void ordenar_mayor_menor(int primero_desordenado = 0);
+  void ordenar_menor_mayor(int primero_desordenado = 0);
+  inline void swap(int, int);
+  inline int get_num_contenedores(void);
   inline int get_n_objetos(void);
   inline int get_capacidad(void);
   inline int get_n_contenedores_optimo(void);
@@ -33,6 +35,7 @@ public:
   void imprimir_objetos(int columnas = 9);
   void leer_fichero(ifstream&);
   INSTANCIA(void);
+  ~INSTANCIA(void);
 };
 class GRUPO_INSTANCIAS
 {
@@ -43,6 +46,8 @@ public:
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
   void estadistica_menos_espacio_deje(int, int&, int&);
+  void estadistica_instrucciones(void);
+  void estadistica_num_contenedores(void);
   //Crear una funcion estadistica que calcule varios ejemplos
   //en los ejemplos se comprueba el numero de contenedores
   //con el numero de contenedores óptimo
@@ -54,4 +59,5 @@ public:
   inline void mostrar_contenido_instancia(int);
   void mostrar_contenido_ficheros(void);
   GRUPO_INSTANCIAS(char*);
+  ~GRUPO_INSTANCIAS(void);
 };

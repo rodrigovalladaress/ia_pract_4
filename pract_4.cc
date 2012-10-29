@@ -5,6 +5,8 @@ bool INSTANCIA::cabe_en_contenedor(int i, int cont)
 }
 int INSTANCIA::espacio_sobrante_contenedor(int cont)
 {
+  if(capacidad - contenedor[cont] < 0)
+    cout << "Error. Espacio sobrante negativo." << endl;
   return capacidad - contenedor[cont];
 }
 void INSTANCIA::nuevo_contenedor(int i)
@@ -30,6 +32,7 @@ int INSTANCIA::antes_que_quepa(void)
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
   {
+    pos_contenedor = 0;
     while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false)) {
       pos_contenedor++;
       num_instrucciones++;
@@ -45,10 +48,11 @@ int INSTANCIA::antes_que_quepa(void)
 int INSTANCIA::menos_espacio_deje(void)
 {
   unsigned pos_contenedor;
-  int num_instrucciones = 0, min_espacio = INF;
+  int num_instrucciones = 0, min_espacio;
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
   {
+    min_espacio = INF;
     pos_contenedor = INF; //Si no cambia no se ha encontrado contenedor en el que quepa
     for(int j = 0; j < contenedor.size(); j++)
     {
@@ -87,7 +91,7 @@ void INSTANCIA::ordenar_aleatoriamente(void)
     j--;
   }
 }
-void INSTANCIA::ordenar_mayor_menor(int primero_desordenado/*= 0*/)
+void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)
 {
   int pos, aux;  
   if(primero_desordenado < n_objetos) {
@@ -100,8 +104,18 @@ void INSTANCIA::ordenar_mayor_menor(int primero_desordenado/*= 0*/)
       objeto[i] = objeto[primero_desordenado];
       objeto[primero_desordenado] = aux;
     }
-    ordenar_mayor_menor(primero_desordenado + 1);
+    ordenar_menor_mayor(primero_desordenado + 1);
   }
+}
+void INSTANCIA::swap(int i, int j)
+{
+  int aux = objeto[j];
+  objeto[j] = objeto[i];
+  objeto[i] = aux;
+}
+int INSTANCIA::get_num_contenedores(void)
+{
+  return contenedor.size();
 }
 int INSTANCIA::get_n_objetos(void)
 {
@@ -167,6 +181,16 @@ INSTANCIA::INSTANCIA(void)
   nombre_instancia = '0';
   objeto_en_contenedor = NULL;
 }
+INSTANCIA::~INSTANCIA(void)
+{
+  objeto.clear();
+  contenedor.clear();
+  if(objeto_en_contenedor != NULL)
+    delete objeto_en_contenedor;
+}
+
+
+
 
 void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, int& tiempo)
 {
@@ -179,6 +203,85 @@ void GRUPO_INSTANCIAS::estadistica_menos_espacio_deje(int i, int& num_instruccio
   cronousec(1);
   num_instrucciones = meter_menos_espacio_deje(i);
   tiempo = cronousec(0);
+}
+void GRUPO_INSTANCIAS::estadistica_instrucciones(void)
+{
+  int num_instrucciones, tiempo;
+  cout << "Nom." << "\t";
+  for(int i = 0; i < n_casos; i++)
+    cout << instancia[i].get_nombre_instancia() << "\t";
+  cout << endl;
+  cout << "MmAq" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_mayor_menor(i);
+    estadistica_antes_que_quepa(i, num_instrucciones, tiempo);
+    cout << num_instrucciones << "\t";
+  }
+  cout << endl;
+  cout << "AlAq" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_aleatoriamente(i);
+    estadistica_antes_que_quepa(i, num_instrucciones, tiempo);
+    cout << num_instrucciones << "\t";
+  }
+  cout << endl;
+  cout << "MmMe" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_mayor_menor(i);
+    estadistica_menos_espacio_deje(i, num_instrucciones, tiempo);
+    cout << num_instrucciones << "\t";
+  }
+  cout << endl;
+  cout << "AlMe" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_aleatoriamente(i);
+    estadistica_menos_espacio_deje(i, num_instrucciones, tiempo);
+    cout << num_instrucciones << "\t";
+  }
+  cout << endl;
+}
+void GRUPO_INSTANCIAS::estadistica_num_contenedores(void)
+{
+  cout << "Nom." << "\t";
+  for(int i = 0; i < n_casos; i++)
+    cout << instancia[i].get_nombre_instancia() << "\t";
+  cout << endl;
+  cout << "MmAq" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_mayor_menor(i);
+    meter_antes_que_quepa(i);
+    cout << instancia[i].get_num_contenedores() << "\t";
+  }
+  cout << endl;
+  cout << "AlAq" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_aleatoriamente(i);
+    meter_antes_que_quepa(i);
+    cout << instancia[i].get_num_contenedores() << "\t";
+  }
+  cout << endl;
+  cout << "MmMe" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_mayor_menor(i);
+    meter_menos_espacio_deje(i);
+    cout << instancia[i].get_num_contenedores() << "\t";
+  }
+  cout << endl;
+  cout << "AlMe" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    ordenar_aleatoriamente(i);
+    meter_menos_espacio_deje(i);
+    cout << instancia[i].get_num_contenedores() << "\t";
+  }
+  cout << endl;
 }
 int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
 {
@@ -194,7 +297,13 @@ void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 }
 void GRUPO_INSTANCIAS::ordenar_mayor_menor(int i)
 {
-  instancia[i].ordenar_mayor_menor();
+  int izq = 0, der = instancia[i].get_n_objetos() - 1;
+  instancia[i].ordenar_menor_mayor(); //se ordena de menor a mayor
+  while(izq < der) { //se cambian las posiciones para que sea de mayor a menor
+    instancia[i].swap(izq, der);
+    izq++;
+    der--;
+  }
 }
 void GRUPO_INSTANCIAS::mostrar_contenedores_instancia(int i)
 {
@@ -235,4 +344,10 @@ GRUPO_INSTANCIAS::GRUPO_INSTANCIAS(char *nombre_fichero)
     for(int i = 0; i < n_casos; i++) //pasar el flujo a cada constructor de instancia
       instancia[i].leer_fichero(flujo);
   }
+  flujo.close();
+}
+GRUPO_INSTANCIAS::~GRUPO_INSTANCIAS(void)
+{
+  for(int i = 0; i < n_casos; i++)
+    instancia[i].~INSTANCIA();
 }
