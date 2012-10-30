@@ -24,7 +24,7 @@ public:
   int menos_espacio_deje(void);
   void ordenar_aleatoriamente(void);
   void ordenar_menor_mayor(int primero_desordenado = 0);
-  inline void swap(int, int);
+  inline void swap(int, int); //intercambia el primer objeto por el segundo
   inline int get_num_contenedores(void);
   inline int get_n_objetos(void);
   inline int get_capacidad(void);
@@ -41,16 +41,13 @@ class GRUPO_INSTANCIAS
 {
 private:
   int n_casos;
-  INSTANCIA* instancia;
+  INSTANCIA** instancia; //array de punteros a instancia
 public:
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
   void estadistica_menos_espacio_deje(int, int&, int&);
   void estadistica_instrucciones(void);
   void estadistica_num_contenedores(void);
-  //Crear una funcion estadistica que calcule varios ejemplos
-  //en los ejemplos se comprueba el numero de contenedores
-  //con el numero de contenedores óptimo
   inline int meter_antes_que_quepa(int);
   inline int meter_menos_espacio_deje(int);
   inline void ordenar_aleatoriamente(int);

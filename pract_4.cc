@@ -209,7 +209,7 @@ void GRUPO_INSTANCIAS::estadistica_instrucciones(void)
   int num_instrucciones, tiempo;
   cout << "Nom." << "\t";
   for(int i = 0; i < n_casos; i++)
-    cout << instancia[i].get_nombre_instancia() << "\t";
+    cout << instancia[i]->get_nombre_instancia() << "\t";
   cout << endl;
   cout << "MmAq" << "\t";
   for(int i = 0; i < n_casos; i++)
@@ -248,22 +248,30 @@ void GRUPO_INSTANCIAS::estadistica_num_contenedores(void)
 {
   cout << "Nom." << "\t";
   for(int i = 0; i < n_casos; i++)
-    cout << instancia[i].get_nombre_instancia() << "\t";
+    cout << instancia[i]->get_nombre_instancia() << "\t";
+  cout << endl;
+  cout << "AlAq" << "\t";
+  for(int i = 0; i < n_casos; i++)
+  {
+    //ordenar_mayor_menor(i);
+    meter_antes_que_quepa(i);
+    cout << instancia[i]->get_num_contenedores() << "\t";
+  }
   cout << endl;
   cout << "MmAq" << "\t";
   for(int i = 0; i < n_casos; i++)
   {
     ordenar_mayor_menor(i);
     meter_antes_que_quepa(i);
-    cout << instancia[i].get_num_contenedores() << "\t";
+    cout << instancia[i]->get_num_contenedores() << "\t";
   }
   cout << endl;
-  cout << "AlAq" << "\t";
+  cout << "AlMe" << "\t";
   for(int i = 0; i < n_casos; i++)
   {
-    ordenar_aleatoriamente(i);
-    meter_antes_que_quepa(i);
-    cout << instancia[i].get_num_contenedores() << "\t";
+    //ordenar_mayor_menor(i);
+    meter_menos_espacio_deje(i);
+    cout << instancia[i]->get_num_contenedores() << "\t";
   }
   cout << endl;
   cout << "MmMe" << "\t";
@@ -271,47 +279,39 @@ void GRUPO_INSTANCIAS::estadistica_num_contenedores(void)
   {
     ordenar_mayor_menor(i);
     meter_menos_espacio_deje(i);
-    cout << instancia[i].get_num_contenedores() << "\t";
-  }
-  cout << endl;
-  cout << "AlMe" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_aleatoriamente(i);
-    meter_menos_espacio_deje(i);
-    cout << instancia[i].get_num_contenedores() << "\t";
+    cout << instancia[i]->get_num_contenedores() << "\t";
   }
   cout << endl;
 }
 int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
 {
-  return instancia[i].antes_que_quepa();
+  return instancia[i]->antes_que_quepa();
 }
 int GRUPO_INSTANCIAS::meter_menos_espacio_deje(int i)
 {
-  return instancia[i].menos_espacio_deje();
+  return instancia[i]->menos_espacio_deje();
 }
 void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 {
-  instancia[i].ordenar_aleatoriamente();
+  instancia[i]->ordenar_aleatoriamente();
 }
 void GRUPO_INSTANCIAS::ordenar_mayor_menor(int i)
 {
-  int izq = 0, der = instancia[i].get_n_objetos() - 1;
-  instancia[i].ordenar_menor_mayor(); //se ordena de menor a mayor
+  int izq = 0, der = instancia[i]->get_n_objetos() - 1;
+  instancia[i]->ordenar_menor_mayor(); //se ordena de menor a mayor
   while(izq < der) { //se cambian las posiciones para que sea de mayor a menor
-    instancia[i].swap(izq, der);
+    instancia[i]->swap(izq, der);
     izq++;
     der--;
   }
 }
 void GRUPO_INSTANCIAS::mostrar_contenedores_instancia(int i)
 {
-  instancia[i].imprimir_contenedores();
+  instancia[i]->imprimir_contenedores();
 }
 void GRUPO_INSTANCIAS::mostrar_contenido_instancia(int i)
 {
-  instancia[i].imprimir_objetos();
+  instancia[i]->imprimir_objetos();
 }
 void GRUPO_INSTANCIAS::mostrar_contenido_ficheros(void)
 {
@@ -321,7 +321,7 @@ void GRUPO_INSTANCIAS::mostrar_contenido_ficheros(void)
   {
     cout << "----------------------------------------------------------------------------" << endl;
     cout << endl;
-    p = &instancia[i];
+    p = instancia[i];
     cout << p->get_nombre_instancia() << endl;
     cout << "c = " << p->get_capacidad() << " i = " << p->get_n_objetos() << endl;
     cout << "Contenedores óptimos = " << p->get_n_contenedores_optimo() << endl;
@@ -339,15 +339,17 @@ GRUPO_INSTANCIAS::GRUPO_INSTANCIAS(char *nombre_fichero)
     cout << "Error al abrir el fichero." << endl;
   else {
     flujo >> n_casos;
-    instancia = new INSTANCIA[n_casos];
-    cout << "n_casos = " << n_casos << endl;
-    for(int i = 0; i < n_casos; i++) //pasar el flujo a cada constructor de instancia
-      instancia[i].leer_fichero(flujo);
+    instancia = new INSTANCIA*[n_casos];
+    cout << "n_casos = " << n_casos << endl << endl;
+    for(int i = 0; i < n_casos; i++) { //pasar el flujo a cada constructor de instancia
+      instancia[i] = new INSTANCIA[n_casos];
+      instancia[i]->leer_fichero(flujo);
+    }
   }
   flujo.close();
 }
 GRUPO_INSTANCIAS::~GRUPO_INSTANCIAS(void)
 {
   for(int i = 0; i < n_casos; i++)
-    instancia[i].~INSTANCIA();
+    instancia[i]->~INSTANCIA();
 }
