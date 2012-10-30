@@ -175,6 +175,16 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
     objeto.push_back(aux);
   }
 }
+INSTANCIA::INSTANCIA(INSTANCIA* p)
+{
+  n_objetos = p->get_n_objetos();
+  capacidad = p->get_capacidad();
+  n_contenedores_optimo = p->get_n_contenedores_optimo();
+  objeto_en_contenedor = new int[n_objetos];
+  nombre_instancia = p->get_nombre_instancia();
+  for(int i = 0; i < n_objetos; i++)
+    objeto[i] = p->get_objeto(i); 
+}
 INSTANCIA::INSTANCIA(void)
 {
   n_objetos = 0;
@@ -191,7 +201,10 @@ INSTANCIA::~INSTANCIA(void)
 
 
 
-
+void GRUPO_INSTANCIAS::LS(int i)
+{
+  
+}
 void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, int& tiempo)
 {
   cronousec(1);

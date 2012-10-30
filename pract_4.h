@@ -34,6 +34,7 @@ public:
   void imprimir_contenedores(void);
   void imprimir_objetos(int columnas = 9);
   void leer_fichero(ifstream&);
+  INSTANCIA(INSTANCIA*); //Constructor de copia para LS
   INSTANCIA(void);
   ~INSTANCIA(void);
 };
@@ -43,6 +44,7 @@ private:
   int n_casos;
   INSTANCIA** instancia; //array de punteros a instancia
 public:
+  void LS(int);
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
   void estadistica_menos_espacio_deje(int, int&, int&);
