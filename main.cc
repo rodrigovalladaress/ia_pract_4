@@ -6,12 +6,23 @@ int main(void)
   int time;
   GRUPO_INSTANCIAS grupo_instancias(nombre_fichero);
   //grupo_instancias.mostrar_contenido_ficheros();
-  grupo_instancias.ordenar_mayor_menor(9);
+  //grupo_instancias.ordenar_mayor_menor(9);
   //grupo_instancias.mostrar_contenido_instancia(9);
   //grupo_instancias.meter_antes_que_quepa(9);
   //grupo_instancias.mostrar_contenedores_instancia(9);
   //grupo_instancias.estadistica_antes_que_quepa(9, inst, time);
   //grupo_instancias.ordenar_mayor_menor(6);
   //grupo_instancias.meter_menos_espacio_deje(6);
-  grupo_instancias.estadistica_num_contenedores();
+  //grupo_instancias.estadistica_num_contenedores();
+  for(int i = 0; i < 1000; i++)
+  {
+    grupo_instancias.ordenar_aleatoriamente(2);
+    grupo_instancias.meter_antes_que_quepa(2);
+    //cout << "LS -------------------------------------->" << endl;
+    //for(int j = 0; j < 100; j++)
+    cout << "-----" << endl;
+    grupo_instancias.LS(2);
+    //rupo_instancias.integridad_instancia(2);
+  }
+  
 }
