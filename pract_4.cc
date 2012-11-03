@@ -4,6 +4,10 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                       private //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                 mover objetos //
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void INSTANCIA::quitar_objeto_de_contenedor(int i)
 {
   contenedor[objeto_en_contenedor[i]] -= objeto[i];
@@ -21,6 +25,18 @@ void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
     }
   }
 }
+int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
+{
+  int encaja = -1, mayor_objeto_que_encaja = 0;
+  for(int i = a_partir_de; i < n_objetos; i++)//buscar objeto que quepa o que sea menor que el hueco
+  {
+    if((objeto[i] <= hueco)&&(objeto[i] > mayor_objeto_que_encaja)) {
+      encaja = i;
+      mayor_objeto_que_encaja = objeto[i];
+    }
+  }
+  return encaja;
+}
 void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
 {
   int min_espacio = INF;
@@ -35,6 +51,9 @@ void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
   }
   meter_en_contenedor(i, pos_contenedor);
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                  contenedores //
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void INSTANCIA::borrar_contenedores_vacios(void)
 {
   for(int i = 0; i < contenedor.size(); i++)
@@ -128,11 +147,32 @@ void INSTANCIA::integridad_instancia(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           LS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::LS_proximo_10(void)
+{
+  int suma, i, obj_para_swap/*objeto para intercambiar por otro*/;
+  int hueco;
+  vector<int> auxiliar;
+  for(i = 0; i < n_objetos; i++)
+  {
+    suma = 0;
+    while((i < n_objetos)&&(suma < capacidad)) { //va sumando los objetos por orden
+      suma += objeto[i];
+      i++;
+    }
+    if((i < n_objetos)&&(suma > capacidad)){ //si se sobrepasa de la capacidad
+      hueco = suma - objeto[i - 1];
+      while(hueco > 0) {
+	obj_para_swap = buscar_objeto_que_encaje_en(hueco);
+	swap(obj_para_swap, i - 1);
+	hueco -= objeto[obj_para_swap];//intenta llenar el hueco con varios objetos
+      }
+    }
+  }
+}
 void INSTANCIA::LS(void)
 {
   vector<int> auxiliar;
   for(int i = 0; i < n_objetos; i++) {
-    
     mover_objeto_menos_espacio_deje(i);
     borrar_contenedores_vacios();
   }
@@ -369,17 +409,29 @@ void GRUPO_INSTANCIAS::integridad_instancia(int i)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            LS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::LS(int i)
+void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
 {
-  int max_vecinas = 0, espacio_libre_anterior = INF;
+  
+  cout << "principio" << endl;
+  
+  int max_vecinas = 0;
   INSTANCIA p(instancia[i]);
   bool cambiado = true;
+  
+  
+  
+  
   while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
 	 &&(max_vecinas < MAX_VECINAS_LS)
          &&(cambiado == true)) {
     
-    espacio_libre_anterior = p.espacio_sobrante_total(); //comprobar si cambia la solución
-    p.LS();
+    
+    cout << "aqui" << endl;
+    
+    if(op == PRINCIPIO_FINAL)
+      p.LS_proximo_10();
+    else 
+      p.LS();
     max_vecinas++;
     if(p.distinta_solucion(instancia[i]) == false)
       cambiado = false;
@@ -394,6 +446,9 @@ void GRUPO_INSTANCIAS::LS(int i)
   }
   else
     cout << "No hay vecinas mejores." << endl;
+  
+  cout << "fiin" << endl;
+  
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  Estadísticas //
