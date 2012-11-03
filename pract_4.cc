@@ -120,33 +120,24 @@ void INSTANCIA::integridad_instancia(void)
   for(int i = 0; i < n_objetos; i++)
     if(objeto_en_contenedor[i] == -1)
       cout << "No inicializado." << endl;
-  /*
-  int suma_objetos;
-  cout << contenedor.size() << endl;
-  for(int i = 0; i < contenedor.size(); i++)
-  {
-    cout << endl;
-    suma_objetos = 0;
-    if(contenedor[i] > capacidad)
-      cout << "Error en las capacidades." << endl;
-    for(int j = 0; j < n_objetos; j++)
-    {
-      if(objeto_en_contenedor[j] == i)
-	suma_objetos += objeto[i];
-      if((objeto_en_contenedor[j] < 0)||(objeto_en_contenedor[j] >= contenedor.size()))
-	cout << "El objeto no ha sido introducido." << endl;
-    }
-    if(suma_objetos != contenedor[i]) {
-      cout << "Los objetos introducidos no concuerdan con el espacio ocupado del contenedor.";
-      cout << endl;
-      cout << "El contenedor " << i << " tiene ocupado " << contenedor[i] << endl;
-      cout << "La suma de los objetos en " << i << " es " << suma_objetos << endl;
-    }
-  }*/
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           LS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::LS_azar(void)
+{
+  int mitad = objeto.size() / 2;
+  int izq, der;
+  int max = rand() % (mitad / 3);
+  for(int i = 0; i < max; i++) //intercambiar x objetos al azar
+  {
+    izq = rand() % mitad;
+    der = mitad + (rand() % (objeto.size() - mitad));
+    swap(izq, der);
+  }
+  reiniciar_contenedores();
+  antes_que_quepa();  
+}
 void INSTANCIA::LS_proximo_10(void)
 {
   int suma, i, obj_para_swap = INF/*objeto para intercambiar por otro*/;
@@ -171,7 +162,7 @@ void INSTANCIA::LS_proximo_10(void)
 	  //cout << "No se encontró objeto para llenar el hueco" << endl;
 	i++;
       }
-      i--;
+      //i--;
     }
     i--;
   }
@@ -245,7 +236,6 @@ int INSTANCIA::menos_espacio_deje(void)
 void INSTANCIA::ordenar_aleatoriamente(void)
 {
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
-  srand(time(NULL));
   while((i < n_objetos)&&(j > 0)) {
     //Se ordena aleatoriamente el vector de abajo a arriba
     pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
@@ -419,32 +409,64 @@ void GRUPO_INSTANCIAS::integridad_instancia(int i)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            SA //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::SA(int i)
+float GRUPO_INSTANCIAS::Pr(float c, int delta)
 {
-  
+  if(delta > 0)
+    return 1;
+  else
+    return exp(((float)delta) / c);
 }
-
+void GRUPO_INSTANCIAS::SA(int i, int op, float c, float alfa)
+{
+  INSTANCIA sol_actual(instancia[i]), mejor_sol(instancia[i]), sol_vecina(instancia[i]);
+  sol_actual.ordenar_aleatoriamente();
+  sol_actual.antes_que_quepa();
+  mejor_sol.igualar(&sol_actual);
+  int max_vecinas = 0;
+  float rand_f;
+  while(max_vecinas < MAX_VECINAS_SA) {
+    if(op == PROXIMO_10)
+      sol_vecina.LS_proximo_10();
+    else if(op == MENOS_ESPACIO_DEJE)
+      sol_vecina.LS();
+    else
+      sol_vecina.LS_azar();
+    rand_f = (float)rand()/(float)RAND_MAX;
+    if(Pr(c, sol_actual.get_num_contenedores() - sol_vecina.get_num_contenedores()) > rand_f)
+      sol_actual.igualar(&sol_vecina);
+    if(sol_actual.get_num_contenedores() < mejor_sol.get_num_contenedores())
+      mejor_sol.igualar(&sol_actual);
+    c *= alfa;
+    max_vecinas++;
+  }
+  if(mejor_sol.get_num_contenedores() < instancia[i]->get_num_contenedores())
+    instancia[i]->igualar(&mejor_sol);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            LS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::ILS(int i, int it, bool op, bool tipo)
+void GRUPO_INSTANCIAS::ILS(int i, int it, int op, bool tipo)
 {
   int max_vecinas = 0;
   INSTANCIA p(instancia[i]);
-  bool cambiado = true;
+  bool cambiado = true;  
   for(int j = 0; j < it; j++)
   {
     if(tipo == MULTI_ARRANQUE) {
       p.ordenar_aleatoriamente();
       p.menos_espacio_deje();
     }
+    else
+      p.igualar(instancia[i]);
     while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
 	  &&(max_vecinas < MAX_VECINAS_LS)
 	  &&(cambiado == true)) {
       if(op == PROXIMO_10)
 	p.LS_proximo_10();
-      else
+      else if(op == MENOS_ESPACIO_DEJE)
 	p.LS();
+      else
+	p.LS_azar();
       max_vecinas++;
       if(p.distinta_solucion(instancia[i]) == false)
 	cambiado = false;
@@ -459,12 +481,14 @@ void GRUPO_INSTANCIAS::ILS(int i, int it, bool op, bool tipo)
     }
   }
 }
-void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
+void GRUPO_INSTANCIAS::LS(int i, int op/*= false*/)
 {
   if(op == PROXIMO_10)
     instancia[i]->LS_proximo_10();
-  else
+  else if(op == MENOS_ESPACIO_DEJE)
     instancia[i]->LS();
+  else
+    instancia[i]->LS_azar();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  Estadísticas //
@@ -618,6 +642,7 @@ void GRUPO_INSTANCIAS::mostrar_contenido_ficheros(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 GRUPO_INSTANCIAS::GRUPO_INSTANCIAS(char *nombre_fichero)
 {
+  srand(time(NULL));
   cout << "nombre_fichero = " << nombre_fichero << endl;
   ifstream flujo;
   flujo.open(nombre_fichero);

@@ -18,8 +18,8 @@ int main(void)
   grupo_instancias.ordenar_aleatoriamente(0);
   grupo_instancias.meter_menos_espacio_deje(0);
   //grupo_instancias.mostrar_contenedores_instancia(0);
-  
-  grupo_instancias.ILS(0, 500, true, MULTI_ARRANQUE);
+  for(int i = 0; i < 90; i++)
+  grupo_instancias.SA(0, PROXIMO_10, 1, 0.99);
   /*
   for(int i = 0; i < 1000; i++)
   {

@@ -3,10 +3,14 @@
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
+#include <math.h>
 #define INF 4000
-#define MAX_VECINAS_LS 10
+#define e 2.7182
+#define MAX_VECINAS_LS 100
+#define MAX_VECINAS_SA 100
 #define MENOS_ESPACIO_DEJE 0
 #define PROXIMO_10 1
+#define SWAP_AZAR 2
 #define MAX_ILS 10
 #define LOCAL_ITERADA 0
 #define MULTI_ARRANQUE 1
@@ -37,6 +41,7 @@ public:
   bool distinta_solucion(INSTANCIA*);
   int espacio_sobrante_total(void);
   void integridad_instancia(void);
+  void LS_azar(void);
   void LS_proximo_10(void);
   void LS(void);
   int antes_que_quepa(void);
@@ -67,9 +72,10 @@ private:
   INSTANCIA** instancia; //array de punteros a instancia
 public:
   void integridad_instancia(int);
-  void SA(int);
-  void ILS(int, int it = MAX_ILS, bool op = false, bool tipo = false);
-  void LS(int, bool op = false);
+  float Pr(float, int);
+  void SA(int, int = MENOS_ESPACIO_DEJE, float = 1, float = 0.9);
+  void ILS(int, int = MAX_ILS, int = MENOS_ESPACIO_DEJE, bool = false);
+  void LS(int, int op = 0);
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
   void estadistica_menos_espacio_deje(int, int&, int&);
