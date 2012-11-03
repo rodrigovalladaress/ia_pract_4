@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #define INF 4000
 #define MAX_VECINAS_LS 10
-#define PRINCIPIO_FINAL true
+#define PROXIMO_10 true
 using namespace std;
 class INSTANCIA
 {
@@ -17,7 +17,6 @@ private:
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
-
   void quitar_objeto_de_contenedor(int);
   void ordenar_objetos_segun_contenedor(vector<int>&); /* Ordena los objetos para que a la hora se introdu-
   cirlos en los contenedores, estos no cambien de contenedor*/
@@ -26,7 +25,6 @@ private:
   void mover_objeto_menos_espacio_deje(int);
   void borrar_contenedores_vacios(void);
   inline bool cabe_en_contenedor(int, int); //objeto, contenedor
-  
   inline int espacio_sobrante_contenedor(int);
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
@@ -65,6 +63,7 @@ private:
   INSTANCIA** instancia; //array de punteros a instancia
 public:
   void integridad_instancia(int);
+  void SA(int);
   void LS(int, bool op = false);
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)

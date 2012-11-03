@@ -1,7 +1,7 @@
 #include "pract_4.cc"
 int main(void)
 {
-  char nombre_fichero[] = "BPP10.txt";
+  char nombre_fichero[] = "prueba";
   int inst;
   int time;
   GRUPO_INSTANCIAS grupo_instancias(nombre_fichero);
@@ -14,17 +14,13 @@ int main(void)
   //grupo_instancias.ordenar_mayor_menor(6);
   //grupo_instancias.meter_menos_espacio_deje(6);
   //grupo_instancias.estadistica_num_contenedores();
-  grupo_instancias.ordenar_mayor_menor(2);
-  grupo_instancias.meter_antes_que_quepa(2);
-  for(int i = 0; i < 100; i++) {
-    
-    cout << i << endl;
-    
-    grupo_instancias.LS(2, PRINCIPIO_FINAL);
+  //grupo_instancias.ordenar_aleatoriamente(2);
+  grupo_instancias.ordenar_mayor_menor(0);
+  grupo_instancias.meter_antes_que_quepa(0);
+  //grupo_instancias.mostrar_contenedores_instancia(0);
+  for(int i = 0; i < 1; i++) {
+    grupo_instancias.LS(0, PROXIMO_10);
   }
-  
-  
-  cout << "main" << endl;
   /*
   for(int i = 0; i < 1000; i++)
   {

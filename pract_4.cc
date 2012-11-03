@@ -149,7 +149,7 @@ void INSTANCIA::integridad_instancia(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void INSTANCIA::LS_proximo_10(void)
 {
-  int suma, i, obj_para_swap/*objeto para intercambiar por otro*/;
+  int suma, i, obj_para_swap = INF/*objeto para intercambiar por otro*/;
   int hueco;
   vector<int> auxiliar;
   for(i = 0; i < n_objetos; i++)
@@ -160,14 +160,23 @@ void INSTANCIA::LS_proximo_10(void)
       i++;
     }
     if((i < n_objetos)&&(suma > capacidad)){ //si se sobrepasa de la capacidad
-      hueco = suma - objeto[i - 1];
-      while(hueco > 0) {
-	obj_para_swap = buscar_objeto_que_encaje_en(hueco);
-	swap(obj_para_swap, i - 1);
-	hueco -= objeto[obj_para_swap];//intenta llenar el hueco con varios objetos
+      hueco = capacidad - (suma - objeto[i - 1]);
+      while((hueco > 0)&&(obj_para_swap != -1)) {
+	obj_para_swap = buscar_objeto_que_encaje_en(hueco, i);//si es -1 no ha encontrado objeto
+	if(obj_para_swap != -1) {
+	  swap(obj_para_swap, i - 1);
+	  hueco -= objeto[obj_para_swap];//intenta llenar el hueco con varios objetos
+	}
+	//else
+	  //cout << "No se encontró objeto para llenar el hueco" << endl;
+	i++;
       }
+      i--;
     }
+    i--;
   }
+  reiniciar_contenedores();
+  antes_que_quepa();
 }
 void INSTANCIA::LS(void)
 {
@@ -407,28 +416,24 @@ void GRUPO_INSTANCIAS::integridad_instancia(int i)
   instancia[i]->integridad_instancia();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                            SA //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void GRUPO_INSTANCIAS::SA(int i)
+{
+  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            LS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
 {
-  
-  cout << "principio" << endl;
-  
   int max_vecinas = 0;
   INSTANCIA p(instancia[i]);
   bool cambiado = true;
-  
-  
-  
-  
   while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
 	 &&(max_vecinas < MAX_VECINAS_LS)
          &&(cambiado == true)) {
-    
-    
-    cout << "aqui" << endl;
-    
-    if(op == PRINCIPIO_FINAL)
+    if(op == PROXIMO_10)
       p.LS_proximo_10();
     else 
       p.LS();
@@ -438,17 +443,14 @@ void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
   }
   if(cambiado == false)
     cout << "No cambió la solución." << endl;
-  if((p.get_num_contenedores() < instancia[i]->get_num_contenedores())
-     ||(p.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())) {
+  if((p.get_num_contenedores() <= instancia[i]->get_num_contenedores())
+     ||(p.espacio_sobrante_total() <= instancia[i]->espacio_sobrante_total())) {
     cout << "Mejor vecina, de " << instancia[i]->get_num_contenedores()  << " a ";
     cout << p.get_num_contenedores() << endl;
     instancia[i]->igualar(&p);
   }
   else
-    cout << "No hay vecinas mejores." << endl;
-  
-  cout << "fiin" << endl;
-  
+    cout << "No hay vecinas mejores." << endl;  
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  Estadísticas //
