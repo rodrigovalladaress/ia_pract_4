@@ -365,6 +365,7 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
 }
 void INSTANCIA::igualar(INSTANCIA *p)
 {
+  reiniciar_contenedores();
   n_objetos = p->get_n_objetos();
   capacidad = p->get_capacidad();
   n_contenedores_optimo = p->get_n_contenedores_optimo();
@@ -422,35 +423,48 @@ void GRUPO_INSTANCIAS::SA(int i)
 {
   
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            LS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
+void GRUPO_INSTANCIAS::ILS(int i, int it, bool op, bool tipo)
 {
   int max_vecinas = 0;
   INSTANCIA p(instancia[i]);
   bool cambiado = true;
-  while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
-	 &&(max_vecinas < MAX_VECINAS_LS)
-         &&(cambiado == true)) {
-    if(op == PROXIMO_10)
-      p.LS_proximo_10();
-    else 
-      p.LS();
-    max_vecinas++;
-    if(p.distinta_solucion(instancia[i]) == false)
-      cambiado = false;
+  for(int j = 0; j < it; j++)
+  {
+    if(tipo == MULTI_ARRANQUE) {
+      p.ordenar_aleatoriamente();
+      p.menos_espacio_deje();
+    }
+    while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
+	  &&(max_vecinas < MAX_VECINAS_LS)
+	  &&(cambiado == true)) {
+      if(op == PROXIMO_10)
+	p.LS_proximo_10();
+      else
+	p.LS();
+      max_vecinas++;
+      if(p.distinta_solucion(instancia[i]) == false)
+	cambiado = false;
+    }
+    if(cambiado == false)
+      cout << "No cambió la solución." << endl;
+    if((p.get_num_contenedores() < instancia[i]->get_num_contenedores())
+      ||(p.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())) {
+      cout << "Mejor vecina, de " << instancia[i]->get_num_contenedores()  << " a ";
+      cout << p.get_num_contenedores() << endl;
+      instancia[i]->igualar(&p);
+    }
   }
-  if(cambiado == false)
-    cout << "No cambió la solución." << endl;
-  if((p.get_num_contenedores() <= instancia[i]->get_num_contenedores())
-     ||(p.espacio_sobrante_total() <= instancia[i]->espacio_sobrante_total())) {
-    cout << "Mejor vecina, de " << instancia[i]->get_num_contenedores()  << " a ";
-    cout << p.get_num_contenedores() << endl;
-    instancia[i]->igualar(&p);
-  }
+}
+void GRUPO_INSTANCIAS::LS(int i, bool op/*= false*/)
+{
+  if(op == PROXIMO_10)
+    instancia[i]->LS_proximo_10();
   else
-    cout << "No hay vecinas mejores." << endl;  
+    instancia[i]->LS();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  Estadísticas //

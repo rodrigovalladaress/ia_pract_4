@@ -5,7 +5,11 @@
 #include <stdlib.h>
 #define INF 4000
 #define MAX_VECINAS_LS 10
-#define PROXIMO_10 true
+#define MENOS_ESPACIO_DEJE 0
+#define PROXIMO_10 1
+#define MAX_ILS 10
+#define LOCAL_ITERADA 0
+#define MULTI_ARRANQUE 1
 using namespace std;
 class INSTANCIA
 {
@@ -64,6 +68,7 @@ private:
 public:
   void integridad_instancia(int);
   void SA(int);
+  void ILS(int, int it = MAX_ILS, bool op = false, bool tipo = false);
   void LS(int, bool op = false);
   void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
   //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
