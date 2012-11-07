@@ -25,15 +25,17 @@ private:
   int n_objetos;
   int capacidad;
   int n_contenedores_optimo;
-  vector<int> pila_sacar_objetos;
+  vector<int> pos_objeto; //Se cambia el orden de los objetos para ir metiéndolos en los contenedores
+  //en un principio está inicializado a [0,1,2,3,...,n_objetos]
+  //cada valor indica una posición del vector objeto
   vector<int> objeto; //El orden de los objetos permanece constante
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
   int elegir_objeto_al_azar(void);
   void quitar_objeto_de_contenedor(int);
-  void ordenar_objetos_segun_contenedor(vector<int>&); /* Ordena los objetos para que a la hora se introdu-
-  cirlos en los contenedores, estos no cambien de contenedor*/
+  //void ordenar_objetos_segun_contenedor(vector<int>&); /* Ordena los objetos para que a la hora se introdu-
+  //cirlos en los contenedores, estos no cambien de contenedor*/
   int buscar_objeto_que_encaje_en(int, int a_partir_de = 0); //hueco, posicion a buscar
   //devuelve el mayor objeto que encaja en un hueco
   void mover_objeto_menos_espacio_deje(int);
@@ -43,10 +45,6 @@ private:
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
   void reiniciar_contenedores(void);
-  void iniciar_pila_aleatoriamente(void);
-  void iniciar_pila_mayor_menor(void);
-  void iniciar_pila_sin_orden(void);
-  int pop_pos(void);
 public:
   bool distinta_solucion(INSTANCIA*);
   int espacio_sobrante_total(void);
@@ -54,8 +52,8 @@ public:
   void LS_azar(void);
   void LS_proximo_10(void);
   void LS(void);
-  int antes_que_quepa(int = NO_ORDENAR);
-  int menos_espacio_deje(int = NO_ORDENAR);
+  int antes_que_quepa(void);
+  int menos_espacio_deje(void);
   void ordenar_aleatoriamente(void);
   void ordenar_menor_mayor(int = 0);
   inline void swap(int, int); //intercambia el primer objeto por el segundo
@@ -66,6 +64,7 @@ public:
   inline int get_capacidad(void);
   inline int get_n_contenedores_optimo(void);
   inline int get_objeto(int);
+  inline int get_pos_objeto(int);
   inline string get_nombre_instancia(void);
   void imprimir_contenedores(void);
   void imprimir_objetos(int columnas = 9);
@@ -91,14 +90,14 @@ public:
   void estadistica_menos_espacio_deje(int, int&, int&);
   void estadistica_instrucciones(void);
   void estadistica_num_contenedores(void);
-  inline int meter_antes_que_quepa(int, int = NO_ORDENAR);
-  inline int meter_menos_espacio_deje(int, int = NO_ORDENAR);
+  inline int meter_antes_que_quepa(int);
+  inline int meter_menos_espacio_deje(int);
   inline void ordenar_aleatoriamente(int);
   inline void ordenar_mayor_menor(int);
   inline void mostrar_contenedores_instancia(int);
   inline void mostrar_contenido_instancia(int);
-  void mostrar_objetos(int);
   void mostrar_contenido_ficheros(void);
+  void mostrar_objetos(int);
   GRUPO_INSTANCIAS(char*);
   ~GRUPO_INSTANCIAS(void);
 };
