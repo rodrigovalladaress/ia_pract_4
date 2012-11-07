@@ -112,11 +112,26 @@ void INSTANCIA::reiniciar_contenedores(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                Pila de posiciones de objetos  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::ordenar_pila_mayor_menor(int primero_desordenado)
+{
+  int pos, aux;  
+  if(primero_desordenado < n_objetos) {
+    pos = 0;
+    while(objeto[pila_sacar_objetos[primero_desordenado]] > objeto[pila_sacar_objetos[pos]])
+      pos++;
+    for(int i = pos; i < primero_desordenado; i++)
+    {
+      aux = pila_sacar_objetos[i];
+      pila_sacar_objetos[i] = pila_sacar_objetos[primero_desordenado];
+      pila_sacar_objetos[primero_desordenado] = aux;
+    }
+    ordenar_pila_mayor_menor(primero_desordenado + 1);
+  }
+}
 void INSTANCIA::iniciar_pila_aleatoriamente(void)
 {
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
-  for(int i = 0; i < n_objetos; i++)
-    pila_sacar_objetos.push_back(i); //inicializar pila
+  iniciar_pila_sin_orden();
   while((i < n_objetos)&&(j > 0)) {
     //Se ordena aleatoriamente el vector de abajo a arriba
     pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
@@ -134,11 +149,16 @@ void INSTANCIA::iniciar_pila_aleatoriamente(void)
 }
 void INSTANCIA::iniciar_pila_mayor_menor(void)
 {
-  cout << "no hecho aún" << endl;
+  iniciar_pila_sin_orden();
+  ordenar_pila_mayor_menor();
 }
 void INSTANCIA::iniciar_pila_sin_orden(void)
 {
-  cout << "no hecho aún" << endl;
+  if(pila_sacar_objetos.size() != 0)
+    cout << "La pila anterior no estaba vacía. Error en los métodos de sacar de la pila." << endl;
+  pila_sacar_objetos.clear();
+  for(int i = 0; i < n_objetos; i++)
+    pila_sacar_objetos.push_back(i); //inicializar pila
 }
 int INSTANCIA::pop_pos(void)
 {
@@ -341,26 +361,7 @@ int INSTANCIA::menos_espacio_deje(int op)
 
 void INSTANCIA::ordenar_aleatoriamente(void)
 {
-  
-  
   cout << "hay que cambiar el método" << endl;
-  
-  /*
-  int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
-  while((i < n_objetos)&&(j > 0)) {
-    //Se ordena aleatoriamente el vector de abajo a arriba
-    pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
-    aux = objeto[i];
-    objeto[i] = objeto[pos_swap];
-    objeto[pos_swap] = aux;
-    //Se ordena aleatoriamente el vector de arriba a abajo
-    pos_swap = rand() % j;
-    aux = objeto[j];
-    objeto[j] = objeto[pos_swap];
-    objeto[pos_swap] = aux;
-    i++;
-    j--;
-  }*/
 }
 
 void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)

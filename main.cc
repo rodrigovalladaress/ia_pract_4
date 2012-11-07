@@ -18,8 +18,9 @@ int main(void)
   //grupo_instancias.ordenar_mayor_menor(0);
   
   
-  
+  for(int i = 0; i < 10000; i++)
   grupo_instancias.meter_antes_que_quepa(0, ORDEN_ALEATORIO);
+  grupo_instancias.meter_antes_que_quepa(0);
   //grupo_instancias.mostrar_contenedores_instancia(0);
   //for(int i = 0; i < 1; i++)
   //grupo_instancias.GRASP(0);//(0, PROXIMO_10, 1, 0.99);

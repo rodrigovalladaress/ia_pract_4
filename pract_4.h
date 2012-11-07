@@ -43,6 +43,7 @@ private:
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
   void reiniciar_contenedores(void);
+  void ordenar_pila_mayor_menor(int = 0);
   void iniciar_pila_aleatoriamente(void);
   void iniciar_pila_mayor_menor(void);
   void iniciar_pila_sin_orden(void);
