@@ -116,7 +116,7 @@ void INSTANCIA::iniciar_pila_aleatoriamente(void)
 {
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
   for(int i = 0; i < n_objetos; i++)
-    pila_sacar_objetos[i] = i; //inicializar pila
+    pila_sacar_objetos.push_back(i); //inicializar pila
   while((i < n_objetos)&&(j > 0)) {
     //Se ordena aleatoriamente el vector de abajo a arriba
     pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
@@ -134,11 +134,11 @@ void INSTANCIA::iniciar_pila_aleatoriamente(void)
 }
 void INSTANCIA::iniciar_pila_mayor_menor(void)
 {
-  
+  cout << "no hecho aún" << endl;
 }
 void INSTANCIA::iniciar_pila_sin_orden(void)
 {
-  
+  cout << "no hecho aún" << endl;
 }
 int INSTANCIA::pop_pos(void)
 {
@@ -281,7 +281,7 @@ int INSTANCIA::antes_que_quepa(int op)
 {
   unsigned pos_contenedor = 0;
   int num_instrucciones = 0;
-  int i;
+  int pos_objeto;
   contenedor.clear();
   if(op == ORDEN_ALEATORIO)
     iniciar_pila_aleatoriamente();
@@ -294,14 +294,16 @@ int INSTANCIA::antes_que_quepa(int op)
   for(int i = 0; i < n_objetos; i++)
   {
     pos_contenedor = 0;
-    while((pos_contenedor < contenedor.size())&&(cabe_en_contenedor(i, pos_contenedor) == false)) {
+    pos_objeto = pop_pos();//se saca un objeto de la pila
+    while((pos_contenedor < contenedor.size())&&
+          (cabe_en_contenedor(pos_objeto, pos_contenedor) == false)) {
       pos_contenedor++;
       num_instrucciones++;
     }
     if(pos_contenedor == contenedor.size())
-      nuevo_contenedor(i);
+      nuevo_contenedor(pos_objeto);
     else
-      meter_en_contenedor(i, pos_contenedor);
+      meter_en_contenedor(pos_objeto, pos_contenedor);
     num_instrucciones++;
   }
   return num_instrucciones;
@@ -339,6 +341,11 @@ int INSTANCIA::menos_espacio_deje(int op)
 
 void INSTANCIA::ordenar_aleatoriamente(void)
 {
+  
+  
+  cout << "hay que cambiar el método" << endl;
+  
+  /*
   int pos_swap = 0, aux, i = 0, j = n_objetos - 1;
   while((i < n_objetos)&&(j > 0)) {
     //Se ordena aleatoriamente el vector de abajo a arriba
@@ -353,11 +360,16 @@ void INSTANCIA::ordenar_aleatoriamente(void)
     objeto[pos_swap] = aux;
     i++;
     j--;
-  }
+  }*/
 }
 
 void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)
 {
+  
+  
+  cout << "hay que cambiar el método" << endl;
+  
+  /*
   int pos, aux;  
   if(primero_desordenado < n_objetos) {
     pos = 0;
@@ -370,13 +382,15 @@ void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)
       objeto[primero_desordenado] = aux;
     }
     ordenar_menor_mayor(primero_desordenado + 1);
-  }
+  }*/
 }
 void INSTANCIA::swap(int i, int j)
 {
+  cout << "no se usa swap para desordenar objeto" << endl;
+  /*
   int aux = objeto[j];
   objeto[j] = objeto[i];
-  objeto[i] = aux;
+  objeto[i] = aux;*/
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          get_ //
@@ -455,9 +469,9 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
   for(int i = 0; i < n_objetos; i++) {
     flujo >> aux;
     objeto.push_back(aux);
-    objeto.push_back(aux);
+    //objeto.push_back(aux);
     objeto_en_contenedor[i] = -1;
-  }
+  }  
 }
 void INSTANCIA::igualar(INSTANCIA *p)
 {
