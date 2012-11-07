@@ -17,7 +17,7 @@ void INSTANCIA::quitar_objeto_de_contenedor(int i)
   contenedor[objeto_en_contenedor[i]] -= objeto[i];
   objeto_en_contenedor[i] = -1;
 }
-/*void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
+void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
 {
   //vector<int> auxiliar; //nuevo array de objetos
   for(int id_contenedor = 0; id_contenedor < contenedor.size(); id_contenedor++)
@@ -28,7 +28,7 @@ void INSTANCIA::quitar_objeto_de_contenedor(int i)
 	auxiliar.push_back(objeto[i]); // se van introduciendo por orden en el nuevo array
     }
   }
-}*/
+}
 int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
 {
   int encaja = -1, mayor_objeto_que_encaja = 0;
@@ -231,7 +231,7 @@ void INSTANCIA::LS(void)
     mover_objeto_menos_espacio_deje(pos);
     borrar_contenedores_vacios();
   //}
-  //ordenar_objetos_segun_contenedor(auxiliar);
+  ordenar_objetos_segun_contenedor(auxiliar);
   objeto = auxiliar;
   auxiliar.clear();
 }
@@ -295,14 +295,14 @@ void INSTANCIA::ordenar_aleatoriamente(void)
   while((i < n_objetos)&&(j > 0)) {
     //Se ordena aleatoriamente el vector de abajo a arriba
     pos_swap = (i + 1) + rand() % (n_objetos - (i + 1));
-    aux = pos_objeto[i];
-    pos_objeto[i] = pos_objeto[pos_swap];
-    pos_objeto[pos_swap] = aux;
+    aux = objeto[i];
+    objeto[i] = objeto[pos_swap];
+    objeto[pos_swap] = aux;
     //Se ordena aleatoriamente el vector de arriba a abajo
     pos_swap = rand() % j;
-    aux = pos_objeto[j];
-    pos_objeto[j] = pos_objeto[pos_swap];
-    pos_objeto[pos_swap] = aux;
+    aux = objeto[j];
+    objeto[j] = objeto[pos_swap];
+    objeto[pos_swap] = aux;
     i++;
     j--;
   }
@@ -313,22 +313,22 @@ void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)
   int pos, aux;  
   if(primero_desordenado < n_objetos) {
     pos = 0;
-    while(objeto[pos_objeto[primero_desordenado]] > objeto[pos_objeto[pos]])
+    while(objeto[primero_desordenado] > objeto[pos])
       pos++;
     for(int i = pos; i < primero_desordenado; i++)
     {
-      aux = pos_objeto[i];
-      pos_objeto[i] = pos_objeto[primero_desordenado];
-      pos_objeto[primero_desordenado] = aux;
+      aux = objeto[i];
+      objeto[i] = objeto[primero_desordenado];
+      objeto[primero_desordenado] = aux;
     }
     ordenar_menor_mayor(primero_desordenado + 1);
   }
 }
 void INSTANCIA::swap(int i, int j)
 {
-  int aux = pos_objeto[j];
-  pos_objeto[j] = pos_objeto[i];
-  pos_objeto[i] = aux;
+  int aux = objeto[j];
+  objeto[j] = objeto[i];
+  objeto[i] = aux;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          get_ //
@@ -361,10 +361,6 @@ int INSTANCIA::get_objeto(int i)
 {
   return objeto[i];
 }
-int INSTANCIA::get_pos_objeto(int i)
-{
-  return pos_objeto[i];
-}
 string INSTANCIA::get_nombre_instancia(void)
 {
   return nombre_instancia;
@@ -389,14 +385,13 @@ void INSTANCIA::imprimir_objetos(int columnas/*= 9*/)
 {
   int salto_linea = 0;
   for(int i = 0; i < n_objetos; i++) {
-    cout << objeto[pos_objeto[i]] << "\t";
+    cout << objeto[i] << "\t";
     salto_linea++;
     if(salto_linea > columnas) {
       cout << endl;
       salto_linea = 0;
     }
   }
-  cout << endl;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 constructores //
@@ -412,7 +407,7 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
   for(int i = 0; i < n_objetos; i++) {
     flujo >> aux;
     objeto.push_back(aux);
-    pos_objeto.push_back(i);
+    objeto.push_back(aux);
     objeto_en_contenedor[i] = -1;
   }
 }
@@ -426,7 +421,6 @@ void INSTANCIA::igualar(INSTANCIA *p)
   nombre_instancia = p->get_nombre_instancia();
   for(int i = 0; i < n_objetos; i++) {
     objeto.push_back(p->get_objeto(i));
-    pos_objeto.push_back(p->get_pos_objeto(i));
     objeto_en_contenedor[i] = p->get_objeto_en_contenedor(i);
   }
   for(int i = 0; i < p->get_num_contenedores(); i++) 
@@ -684,11 +678,11 @@ void GRUPO_INSTANCIAS::estadistica_num_contenedores(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i)
 {
-  return instancia[i]->antes_que_quepa();
+  return instancia[i]->antes_que_quepa(op);
 }
 int GRUPO_INSTANCIAS::meter_menos_espacio_deje(int i)
 {
-  return instancia[i]->menos_espacio_deje();
+  return instancia[i]->menos_espacio_deje(op);
 }
 void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
 {
@@ -731,10 +725,6 @@ void GRUPO_INSTANCIAS::mostrar_contenido_ficheros(void)
     p->imprimir_objetos();
   }
   cout << "----------------------------------------------------------------------------" << endl;
-}
-void GRUPO_INSTANCIAS::mostrar_objetos(int i)
-{
-  instancia[i]->imprimir_objetos();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 constructores //
