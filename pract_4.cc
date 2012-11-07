@@ -19,6 +19,10 @@ void INSTANCIA::quitar_objeto_de_contenedor(int i)
 }
 void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
 {
+  
+  cout << "No se usa ordenar objetos segun contenedor" << endl;
+  
+  /*
   //vector<int> auxiliar; //nuevo array de objetos
   for(int id_contenedor = 0; id_contenedor < contenedor.size(); id_contenedor++)
   {
@@ -27,7 +31,7 @@ void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
       if(objeto_en_contenedor[i] == id_contenedor) //el objeto se encuentra en el contenedor
 	auxiliar.push_back(objeto[i]); // se van introduciendo por orden en el nuevo array
     }
-  }
+  }*/
 }
 int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
 {
@@ -166,8 +170,6 @@ int INSTANCIA::pop_pos(void)
   pila_sacar_objetos.pop_back();
   return pop;
 }
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,13 +335,22 @@ int INSTANCIA::menos_espacio_deje(int op)
   unsigned pos_contenedor;
   int num_instrucciones = 0, min_espacio;
   contenedor.clear();
+  if(op == ORDEN_ALEATORIO)
+    iniciar_pila_aleatoriamente();
+  else if(op == ORDEN_MAYOR_MENOR)
+    iniciar_pila_mayor_menor();
+  else if(op == NO_ORDENAR)
+    iniciar_pila_sin_orden();
+  else
+    cout << "Solución no válida, no se ordenarán los objetos." << endl;
   for(int i = 0; i < n_objetos; i++)
   {
+    pos_objeto = pop_pos();
     min_espacio = INF;
     pos_contenedor = INF; //Si no cambia no se ha encontrado contenedor en el que quepa
     for(int j = 0; j < contenedor.size(); j++)
     {
-      if((cabe_en_contenedor(i, j) == true)
+      if((cabe_en_contenedor(pos_objeto, j) == true)
 	  &&(min_espacio > espacio_sobrante_contenedor(j))) {
 	min_espacio = espacio_sobrante_contenedor(j);
 	pos_contenedor = j;
@@ -348,9 +359,9 @@ int INSTANCIA::menos_espacio_deje(int op)
       num_instrucciones++;
     }
     if(pos_contenedor == INF)
-      nuevo_contenedor(i);
+      nuevo_contenedor(pos_objeto);
     else
-      meter_en_contenedor(i, pos_contenedor);
+      meter_en_contenedor(pos_objeto, pos_contenedor);
     num_instrucciones++;
   }
   return num_instrucciones;
