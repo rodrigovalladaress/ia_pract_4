@@ -14,24 +14,14 @@ int INSTANCIA::elegir_objeto_al_azar(void)
 }
 void INSTANCIA::quitar_objeto_de_contenedor(int i)
 {
-  contenedor[objeto_en_contenedor[i]] -= objeto[i];
-  objeto_en_contenedor[i] = -1;
+  if(objeto_en_contenedor[i] != -1) {
+    contenedor[objeto_en_contenedor[i]] -= objeto[i];
+    objeto_en_contenedor[i] = -1;
+  }
 }
 void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
 {
-  
   cout << "No se usa ordenar objetos segun contenedor" << endl;
-  
-  /*
-  //vector<int> auxiliar; //nuevo array de objetos
-  for(int id_contenedor = 0; id_contenedor < contenedor.size(); id_contenedor++)
-  {
-    for(int i = 0; i < n_objetos; i++)
-    {
-      if(objeto_en_contenedor[i] == id_contenedor) //el objeto se encuentra en el contenedor
-	auxiliar.push_back(objeto[i]); // se van introduciendo por orden en el nuevo array
-    }
-  }*/
 }
 int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
 {
@@ -44,6 +34,25 @@ int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
     }
   }
   return encaja;
+}
+void INSTANCIA::mover_objeto_antes_que_quepa(int i)
+{
+  unsigned pos_contenedor = 0;
+  quitar_objeto_de_contenedor(i);
+  
+  //cout << "move" << endl;
+  
+  while((pos_contenedor < contenedor.size())&&
+        (cabe_en_contenedor(i, pos_contenedor) == false)) {
+    pos_contenedor++;
+  }
+  
+
+  
+  if(pos_contenedor == contenedor.size())
+    nuevo_contenedor(i);
+  else
+    meter_en_contenedor(i, pos_contenedor);
 }
 void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
 {
@@ -58,6 +67,7 @@ void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
     }
   }
   meter_en_contenedor(i, pos_contenedor);
+  borrar_contenedores_vacios();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  contenedores //
@@ -80,7 +90,7 @@ int INSTANCIA::espacio_sobrante_total(void)
 {
   int espacio_sobrante = 0;
   for(int i = 0; i < contenedor.size(); i++)
-    espacio_sobrante += espacio_sobrante_contenedor(i);
+    espacio_sobrante += espacio_sobrante_contenedor(i) * espacio_sobrante_contenedor(i);
   return espacio_sobrante;
 }
 int INSTANCIA::espacio_sobrante_contenedor(int cont)
@@ -170,6 +180,17 @@ int INSTANCIA::pop_pos(void)
   pila_sacar_objetos.pop_back();
   return pop;
 }
+int INSTANCIA::pop_pos_grasp(int t)
+{
+  int pop, pos;
+  if(pila_sacar_objetos.size() >= t)
+    pos = pila_sacar_objetos.size() - (rand() % t) - 1;
+  else
+    pos = rand() % pila_sacar_objetos.size();
+  pop = pila_sacar_objetos[pos];
+  pila_sacar_objetos.erase(pila_sacar_objetos.begin() + pos);
+  return pop;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,132 +202,41 @@ bool INSTANCIA::distinta_solucion(INSTANCIA* p)
   return i == n_objetos ? false : true;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                           TS  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::TS(int t)
+{
+  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        GRASP  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void INSTANCIA::GRASP(int i)
+void INSTANCIA::GRASP(int t)
 {
-  int pos_contenedor = objeto_en_contenedor[i]; //Si no se pone así da error
-  vector<int> contendedor_candidato;
-  vector<int> espacio_sobrante;
-  quitar_objeto_de_contenedor(i);
-  for(int j = 0; j < contenedor.size(); j++)
-  {
-    if(cabe_en_contenedor(i, j) == true) {
-      if(contendedor_candidato.size() < LCR_SIZE) { //si no se ha sobrepasado LCR_size se mete
-	contendedor_candidato.push_back(j);
-	espacio_sobrante.push_back(espacio_sobrante_contenedor(j));
-      }
-      else { //comprobamos si el menor espacio en los candidatos es mayor que colocar el objeto
-	     //en el contenedor j
-	int min_espacio = INF, pos;
-	for(int k = 0; k < espacio_sobrante.size(); k++)
-	{
-	  if(espacio_sobrante[k] < min_espacio) {
-	    pos = k;
-	    min_espacio = espacio_sobrante[k];
-	  }
-	}
-	if(min_espacio > espacio_sobrante_contenedor(j)) {
-	  contendedor_candidato[pos] = j;
-	  espacio_sobrante[pos] = espacio_sobrante_contenedor(j);
-	}
-      }
-    }
-  }
-  meter_en_contenedor(i, contendedor_candidato[rand() % contendedor_candidato.size()]);
-  /*
-  int pos, aux;
-  vector<int> candidatos;
-  if(primero_desordenado < n_objetos) {
-    pos = 0;
-    while(objeto[primero_desordenado] > objeto[pos]) {
-      candidatos.push_back(pos);
-      pos++;
-    }
-    if(candidatos.size() > 0)
-      pos = candidatos[rand() % candidatos.size()];
-    for(int i = pos; i < primero_desordenado; i++)
-    {
-      aux = objeto[i];
-      objeto[i] = objeto[primero_desordenado];
-      objeto[primero_desordenado] = aux;
-    }
-    ordenar_GRASP(primero_desordenado + 1);
-  }*/
+  reiniciar_contenedores();
+  iniciar_pila_mayor_menor();
+  for(int i = 0; i < n_objetos; i++)
+    mover_objeto_antes_que_quepa(pop_pos_grasp(t));
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           LS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void INSTANCIA::LS_azar(void)
-{
-  int mitad = objeto.size() / 2;
-  int izq, der;
-  int max = rand() % (mitad / 3);
-  for(int i = 0; i < max; i++) //intercambiar x objetos al azar
-  {
-    izq = rand() % mitad;
-    der = mitad + (rand() % (objeto.size() - mitad));
-    swap(izq, der);
-  }
-  reiniciar_contenedores();
-  antes_que_quepa();  
-}
-void INSTANCIA::LS_proximo_10(void)
-{
-  int suma, i, obj_para_swap = INF/*objeto para intercambiar por otro*/;
-  int hueco;
-  vector<int> auxiliar;
-  bool cambiado_un_objeto = false; //cambiar un solo objeto
-  for(i = 0; i < n_objetos; i++)
-  {
-    suma = 0;
-    while((i < n_objetos)&&(suma < capacidad)) { //va sumando los objetos por orden
-      suma += objeto[i];
-      i++;
-    }
-    if((i < n_objetos)&&(suma > capacidad)){ //si se sobrepasa de la capacidad
-      hueco = capacidad - (suma - objeto[i - 1]);
-      while((hueco > 0)&&(obj_para_swap != -1)) {
-	obj_para_swap = buscar_objeto_que_encaje_en(hueco, i);//si es -1 no ha encontrado objeto
-	if(obj_para_swap != -1) {
-	  swap(obj_para_swap, i - 1);
-	  hueco -= objeto[obj_para_swap];//intenta llenar el hueco con varios objetos
-	}
-	//else
-	  //cout << "No se encontró objeto para llenar el hueco" << endl;
-	i++;
-      }
-      //i--;
-    }
-    i--;
-  }
-  reiniciar_contenedores();
-  antes_que_quepa();
-}
 void INSTANCIA::LS(void)
 {
-  vector<int> auxiliar;
-  int pos = elegir_objeto_al_azar();
-  //Cambiar solo un objeto
-  //for(int i = 0; i < n_objetos; i++) {
-    mover_objeto_menos_espacio_deje(pos);
-    borrar_contenedores_vacios();
-  //}
-  ordenar_objetos_segun_contenedor(auxiliar);
-  objeto = auxiliar;
-  auxiliar.clear();
+  int obj = rand() % n_objetos;
+  mover_objeto_menos_espacio_deje(obj);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                    introducir en contenedores //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-int INSTANCIA::antes_que_quepa(int op)
+void INSTANCIA::antes_que_quepa(int op)
 {
   unsigned pos_contenedor = 0;
-  int num_instrucciones = 0;
   int pos_objeto;
-  contenedor.clear();
-  if(op == ORDEN_ALEATORIO)
+  reiniciar_contenedores();
+  if(op == ORDEN_ALEATORIO) {
     iniciar_pila_aleatoriamente();
+  }
   else if(op == ORDEN_MAYOR_MENOR)
     iniciar_pila_mayor_menor();
   else if(op == NO_ORDENAR)
@@ -320,21 +250,18 @@ int INSTANCIA::antes_que_quepa(int op)
     while((pos_contenedor < contenedor.size())&&
           (cabe_en_contenedor(pos_objeto, pos_contenedor) == false)) {
       pos_contenedor++;
-      num_instrucciones++;
     }
     if(pos_contenedor == contenedor.size())
       nuevo_contenedor(pos_objeto);
     else
       meter_en_contenedor(pos_objeto, pos_contenedor);
-    num_instrucciones++;
   }
-  return num_instrucciones;
 }
-int INSTANCIA::menos_espacio_deje(int op)
+void INSTANCIA::menos_espacio_deje(int op)
 {
   unsigned pos_contenedor;
-  int num_instrucciones = 0, min_espacio;
-  contenedor.clear();
+  int min_espacio, pos_objeto;
+  reiniciar_contenedores();
   if(op == ORDEN_ALEATORIO)
     iniciar_pila_aleatoriamente();
   else if(op == ORDEN_MAYOR_MENOR)
@@ -354,55 +281,13 @@ int INSTANCIA::menos_espacio_deje(int op)
 	  &&(min_espacio > espacio_sobrante_contenedor(j))) {
 	min_espacio = espacio_sobrante_contenedor(j);
 	pos_contenedor = j;
-	num_instrucciones++;
       }
-      num_instrucciones++;
     }
     if(pos_contenedor == INF)
       nuevo_contenedor(pos_objeto);
     else
       meter_en_contenedor(pos_objeto, pos_contenedor);
-    num_instrucciones++;
   }
-  return num_instrucciones;
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                               ordenar objetos //
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
-void INSTANCIA::ordenar_aleatoriamente(void)
-{
-  cout << "hay que cambiar el método" << endl;
-}
-
-void INSTANCIA::ordenar_menor_mayor(int primero_desordenado/*= 0*/)
-{
-  
-  
-  cout << "hay que cambiar el método" << endl;
-  
-  /*
-  int pos, aux;  
-  if(primero_desordenado < n_objetos) {
-    pos = 0;
-    while(objeto[primero_desordenado] > objeto[pos])
-      pos++;
-    for(int i = pos; i < primero_desordenado; i++)
-    {
-      aux = objeto[i];
-      objeto[i] = objeto[primero_desordenado];
-      objeto[primero_desordenado] = aux;
-    }
-    ordenar_menor_mayor(primero_desordenado + 1);
-  }*/
-}
-void INSTANCIA::swap(int i, int j)
-{
-  cout << "no se usa swap para desordenar objeto" << endl;
-  /*
-  int aux = objeto[j];
-  objeto[j] = objeto[i];
-  objeto[i] = aux;*/
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                          get_ //
@@ -481,13 +366,15 @@ void INSTANCIA::leer_fichero(ifstream &flujo)
   for(int i = 0; i < n_objetos; i++) {
     flujo >> aux;
     objeto.push_back(aux);
-    //objeto.push_back(aux);
     objeto_en_contenedor[i] = -1;
-  }  
+  }
 }
 void INSTANCIA::igualar(INSTANCIA *p)
 {
   reiniciar_contenedores();
+  objeto.clear();
+  if(objeto_en_contenedor != NULL)
+    delete objeto_en_contenedor;
   n_objetos = p->get_n_objetos();
   capacidad = p->get_capacidad();
   n_contenedores_optimo = p->get_n_contenedores_optimo();
@@ -514,7 +401,7 @@ INSTANCIA::INSTANCIA(INSTANCIA* p)
   for(int i = 0; i < p->get_num_contenedores(); i++) 
     contenedor.push_back(p->get_espacio_ocupado_en_contenedor(i));
   //for(int i = 0; ;)
-    
+
 }
 INSTANCIA::INSTANCIA(void)
 {
@@ -534,40 +421,31 @@ INSTANCIA::~INSTANCIA(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                            TS //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void GRUPO_INSTANCIAS::TS(int i, int t/*= 7*/)
+{
+  INSTANCIA auxiliar(instancia[i]);
+  for(int j = 0; j < NUM_SOLUCIONES; j++)
+  {
+    auxiliar.TS(t);
+    if(auxiliar.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())
+      instancia[i]->igualar(&auxiliar); 
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                         GRASP //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::GRASP(int i, int op)
+void GRUPO_INSTANCIAS::GRASP(int i, int t/*= 7*/)
 {
-  
-  /*
-  INSTANCIA** LCR = new INSTANCIA*[LCR_SIZE];
-  int izq, der;
-  for(int j = 0; j < LCR_SIZE; j++)
+  INSTANCIA auxiliar(instancia[i]);
+  for(int j = 0; j < NUM_SOLUCIONES; j++)
   {
-    izq = 0;
-    der = instancia[i]->get_n_objetos() - 1;
-    LCR[j] = new INSTANCIA(instancia[i]);
-    LCR[j]->ordenar_aleatoriamente();
-    //LCR[j]->ordenar_GRASP();
-    while(izq < der) {
-      LCR[j]->swap(izq, der);
-      izq++;
-      der--;
-    }
-    LCR[j]->antes_que_quepa();*/
-    /*
-    if(op == PROXIMO_10)
-      LCR[j]->LS_proximo_10();
-    else if(op == MENOS_ESPACIO_DEJE)
-      LCR[j]->LS();
-    else
-      LCR[j]->LS_azar();*/
-    /*LCR->ordenar_aleatoriamente();
-    LCR->meter_antes_que_quepa();
-  }  
-  instancia[i]->igualar(LCR[rand() % LCR_SIZE]);*/
+    auxiliar.GRASP(t);
+    if(auxiliar.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())
+      instancia[i]->igualar(&auxiliar); 
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            SA //
@@ -579,63 +457,45 @@ float GRUPO_INSTANCIAS::Pr(float c, int delta)
   else
     return exp(((float)delta) / c);
 }
-void GRUPO_INSTANCIAS::SA(int i, int op, float c, float alfa)
+void GRUPO_INSTANCIAS::SA(int i, int op, float c, float alfa, int reducir_c/*= 7*/)
 {
   INSTANCIA sol_actual(instancia[i]), mejor_sol(instancia[i]), sol_vecina(instancia[i]);
-  sol_actual.ordenar_aleatoriamente();
-  sol_actual.antes_que_quepa();
-  mejor_sol.igualar(&sol_actual);
-  int max_vecinas = 0;
+  int max_vecinas = 0, contador = 0;
   float rand_f;
-  while(max_vecinas < MAX_VECINAS_SA) {
-    if(op == PROXIMO_10)
-      sol_vecina.LS_proximo_10();
-    else if(op == MENOS_ESPACIO_DEJE)
-      sol_vecina.LS();
-    else
-      sol_vecina.LS_azar();
+  while(max_vecinas < NUM_SOLUCIONES) {
+    
+    //sol_vecina.antes_que_quepa(op);
+    sol_vecina.LS(); // da error
     rand_f = (float)rand()/(float)RAND_MAX;
-    if(Pr(c, sol_actual.get_num_contenedores() - sol_vecina.get_num_contenedores()) > rand_f)
+    if(Pr(c, sol_actual.espacio_sobrante_total() - sol_vecina.espacio_sobrante_total()) > rand_f)
       sol_actual.igualar(&sol_vecina);
-    if(sol_actual.get_num_contenedores() < mejor_sol.get_num_contenedores())
+    if(sol_actual.espacio_sobrante_total() < mejor_sol.espacio_sobrante_total())
       mejor_sol.igualar(&sol_actual);
-    c *= alfa;
+    if(contador == reducir_c) {
+      contador = -1;
+      c *= alfa;
+    }
     max_vecinas++;
+    contador++;
   }
-  if(mejor_sol.get_num_contenedores() < instancia[i]->get_num_contenedores())
+  if(mejor_sol.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())
     instancia[i]->igualar(&mejor_sol);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            LS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::ILS(int i, int it, int op, bool tipo)
+void GRUPO_INSTANCIAS::ILS(int i, int op)
 {
-  int max_vecinas = 0;
+  int max_vecinas;
   INSTANCIA p(instancia[i]);
-  bool cambiado = true;  
-  for(int j = 0; j < it; j++)
-  {
-    if(tipo == MULTI_ARRANQUE) {
-      p.ordenar_aleatoriamente();
-      p.menos_espacio_deje();
-    }
-    else
-      p.igualar(instancia[i]);
-    while((p.get_num_contenedores() >= instancia[i]->get_num_contenedores())
-	  &&(max_vecinas < MAX_VECINAS_LS)
-	  &&(cambiado == true)) {
-      if(op == PROXIMO_10)
-	p.LS_proximo_10();
-      else if(op == MENOS_ESPACIO_DEJE)
-	p.LS();
-      else
-	p.LS_azar();
+  for(int j = 0; j < NUM_SOLUCIONES; j++) {
+    max_vecinas = 0;
+    p.antes_que_quepa(op);//se ordena la instancia de prueba aleatoriamente o mayor menor
+    do {
+      p.LS();
       max_vecinas++;
-      if(p.distinta_solucion(instancia[i]) == false)
-	cambiado = false;
-    }
-    if(cambiado == false)
-      cout << "No cambió la solución." << endl;
+    } while(p.espacio_sobrante_total() > instancia[i]->espacio_sobrante_total()
+           &&(max_vecinas < MAX_VECINAS_LS));
     if((p.get_num_contenedores() < instancia[i]->get_num_contenedores())
       ||(p.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())) {
       cout << "Mejor vecina, de " << instancia[i]->get_num_contenedores()  << " a ";
@@ -646,131 +506,21 @@ void GRUPO_INSTANCIAS::ILS(int i, int it, int op, bool tipo)
 }
 void GRUPO_INSTANCIAS::LS(int i, int op/*= false*/)
 {
-  if(op == PROXIMO_10)
-    instancia[i]->LS_proximo_10();
-  else if(op == MENOS_ESPACIO_DEJE)
     instancia[i]->LS();
-  else
-    instancia[i]->LS_azar();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  Estadísticas //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void GRUPO_INSTANCIAS::estadistica_antes_que_quepa(int i, int& num_instrucciones, int& tiempo)
-{
-  cronousec(1);
-  num_instrucciones = meter_antes_que_quepa(i);
-  tiempo = cronousec(0);
-}
-void GRUPO_INSTANCIAS::estadistica_menos_espacio_deje(int i, int& num_instrucciones, int& tiempo)
-{
-  cronousec(1);
-  num_instrucciones = meter_menos_espacio_deje(i);
-  tiempo = cronousec(0);
-}
-void GRUPO_INSTANCIAS::estadistica_instrucciones(void)
-{
-  int num_instrucciones, tiempo;
-  cout << "Nom." << "\t";
-  for(int i = 0; i < n_casos; i++)
-    cout << instancia[i]->get_nombre_instancia() << "\t";
-  cout << endl;
-  cout << "MmAq" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_mayor_menor(i);
-    estadistica_antes_que_quepa(i, num_instrucciones, tiempo);
-    cout << num_instrucciones << "\t";
-  }
-  cout << endl;
-  cout << "AlAq" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_aleatoriamente(i);
-    estadistica_antes_que_quepa(i, num_instrucciones, tiempo);
-    cout << num_instrucciones << "\t";
-  }
-  cout << endl;
-  cout << "MmMe" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_mayor_menor(i);
-    estadistica_menos_espacio_deje(i, num_instrucciones, tiempo);
-    cout << num_instrucciones << "\t";
-  }
-  cout << endl;
-  cout << "AlMe" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_aleatoriamente(i);
-    estadistica_menos_espacio_deje(i, num_instrucciones, tiempo);
-    cout << num_instrucciones << "\t";
-  }
-  cout << endl;
-}
-void GRUPO_INSTANCIAS::estadistica_num_contenedores(void)
-{
-  cout << "Nom." << "\t";
-  for(int i = 0; i < n_casos; i++)
-    cout << instancia[i]->get_nombre_instancia() << "\t";
-  cout << endl;
-  cout << "AlAq" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    //ordenar_mayor_menor(i);
-    meter_antes_que_quepa(i);
-    cout << instancia[i]->get_num_contenedores() << "\t";
-  }
-  cout << endl;
-  cout << "MmAq" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_mayor_menor(i);
-    meter_antes_que_quepa(i);
-    cout << instancia[i]->get_num_contenedores() << "\t";
-  }
-  cout << endl;
-  cout << "AlMe" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    //ordenar_mayor_menor(i);
-    meter_menos_espacio_deje(i);
-    cout << instancia[i]->get_num_contenedores() << "\t";
-  }
-  cout << endl;
-  cout << "MmMe" << "\t";
-  for(int i = 0; i < n_casos; i++)
-  {
-    ordenar_mayor_menor(i);
-    meter_menos_espacio_deje(i);
-    cout << instancia[i]->get_num_contenedores() << "\t";
-  }
-  cout << endl;
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                               meter objetos y ordenar objetos //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-int GRUPO_INSTANCIAS::meter_antes_que_quepa(int i, int op)
+void GRUPO_INSTANCIAS::meter_antes_que_quepa(int i, int op)
 {
-  return instancia[i]->antes_que_quepa(op);
+  instancia[i]->antes_que_quepa(op);
 }
-int GRUPO_INSTANCIAS::meter_menos_espacio_deje(int i, int op)
+void GRUPO_INSTANCIAS::meter_menos_espacio_deje(int i, int op)
 {
-  return instancia[i]->menos_espacio_deje(op);
-}
-void GRUPO_INSTANCIAS::ordenar_aleatoriamente(int i)
-{
-  instancia[i]->ordenar_aleatoriamente();
-}
-void GRUPO_INSTANCIAS::ordenar_mayor_menor(int i)
-{
-  int izq = 0, der = instancia[i]->get_n_objetos() - 1;
-  instancia[i]->ordenar_menor_mayor(); //se ordena de menor a mayor
-  while(izq < der) { //se cambian las posiciones para que sea de mayor a menor
-    instancia[i]->swap(izq, der);
-    izq++;
-    der--;
-  }
+  instancia[i]->menos_espacio_deje(op);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                      imprimir //

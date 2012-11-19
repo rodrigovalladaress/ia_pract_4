@@ -9,19 +9,26 @@
 #define ORDEN_ALEATORIO 0
 #define ORDEN_MAYOR_MENOR 1
 #define NO_ORDENAR 3
+#define REARRANCAR true
+#define NUM_SOLUCIONES 20
 #define MAX_VECINAS_LS 100
-#define MAX_VECINAS_SA 100
+#define MAX_VECINAS_SA 100 //BORRAR
 #define MENOS_ESPACIO_DEJE 0
 #define PROXIMO_10 1
 #define SWAP_AZAR 2
 #define MAX_ILS 10
 #define LOCAL_ITERADA 0
 #define MULTI_ARRANQUE 1
-#define LCR_SIZE 5
+#define REDUCIR_C 7
+#define LCR_SIZE 7
+#define TABU_SIZE 7
+#define K_MAX 7
+#define T 7
 using namespace std;
 class INSTANCIA
 {
 private:
+  //ATRIBUTOS
   int n_objetos;
   int capacidad;
   int n_contenedores_optimo;
@@ -30,12 +37,13 @@ private:
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
+  //MÉTODOS
   int elegir_objeto_al_azar(void);
   void quitar_objeto_de_contenedor(int);
-  void ordenar_objetos_segun_contenedor(vector<int>&); /* Ordena los objetos para que a la hora se introdu-
-  cirlos en los contenedores, estos no cambien de contenedor*/
+  void ordenar_objetos_segun_contenedor(vector<int>&); //borrar
   int buscar_objeto_que_encaje_en(int, int a_partir_de = 0); //hueco, posicion a buscar
   //devuelve el mayor objeto que encaja en un hueco
+  void mover_objeto_antes_que_quepa(int);
   void mover_objeto_menos_espacio_deje(int);
   void borrar_contenedores_vacios(void);
   inline bool cabe_en_contenedor(int, int); //objeto, contenedor
@@ -43,23 +51,26 @@ private:
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
   void reiniciar_contenedores(void);
+  //PILA
   void ordenar_pila_mayor_menor(int = 0);
   void iniciar_pila_aleatoriamente(void);
   void iniciar_pila_mayor_menor(void);
   void iniciar_pila_sin_orden(void);
   int pop_pos(void);
+  int pop_pos_grasp(int);
 public:
   bool distinta_solucion(INSTANCIA*);
   int espacio_sobrante_total(void);
-  void GRASP(int);
+  void TS(int = T);
+  void GRASP(int = T);
   void LS_azar(void);
   void LS_proximo_10(void);
   void LS(void);
-  int antes_que_quepa(int = NO_ORDENAR);
-  int menos_espacio_deje(int = NO_ORDENAR);
+  void antes_que_quepa(int = NO_ORDENAR);
+  void menos_espacio_deje(int = NO_ORDENAR);
   void ordenar_aleatoriamente(void);
   void ordenar_menor_mayor(int = 0);
-  inline void swap(int, int); //intercambia el primer objeto por el segundo
+  //inline void swap(int, int); //intercambia el primer objeto por el segundo
   inline int get_espacio_ocupado_en_contenedor(int);
   inline int get_objeto_en_contenedor(int);
   inline int get_num_contenedores(void);
@@ -82,20 +93,15 @@ private:
   int n_casos;
   INSTANCIA** instancia; //array de punteros a instancia
 public:
+  void TS(int, int = T); //dos opciones, t = 7 o t = 10
   float Pr(float, int);
-  void GRASP(int, int = MENOS_ESPACIO_DEJE);
-  void SA(int, int = MENOS_ESPACIO_DEJE, float = 1, float = 0.9);
-  void ILS(int, int = MAX_ILS, int = MENOS_ESPACIO_DEJE, bool = false);
-  void LS(int, int op = 0);
-  void estadistica_antes_que_quepa(int, int&, int&); //se le pasa el objeto a comprobar
-  //y dos enteros por variable (guarda el número de instrucciones y los microsegundos que tarda)
-  void estadistica_menos_espacio_deje(int, int&, int&);
-  void estadistica_instrucciones(void);
-  void estadistica_num_contenedores(void);
-  inline int meter_antes_que_quepa(int, int = NO_ORDENAR);
-  inline int meter_menos_espacio_deje(int, int = NO_ORDENAR);
-  inline void ordenar_aleatoriamente(int);
-  inline void ordenar_mayor_menor(int);
+  void GRASP(int, int = T); //dos opciones, t = 7 o t = 10
+  void SA(int, int = MENOS_ESPACIO_DEJE, float = 1, float = 0.9, int = REDUCIR_C); 
+  //dos opciones, reducir c cada 7 o 10 itera
+  void ILS(int, int = NO_ORDENAR); //dos opciones mayor menor o aleatorio
+  void LS(int, int = 0);
+  inline void meter_antes_que_quepa(int, int = NO_ORDENAR);
+  inline void meter_menos_espacio_deje(int, int = NO_ORDENAR);
   inline void mostrar_contenedores_instancia(int);
   inline void mostrar_contenido_instancia(int);
   void mostrar_objetos(int);
