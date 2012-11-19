@@ -28,49 +28,56 @@ using namespace std;
 class INSTANCIA
 {
 private:
-  //ATRIBUTOS
+  //ATRIBUTOS //
   int n_objetos;
   int capacidad;
   int n_contenedores_optimo;
+  unsigned tam_cola_tabu;
+  vector<int> cola_tabu;
   vector<int> pila_sacar_objetos;
   vector<int> objeto; //El orden de los objetos permanece constante
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
-  //MÉTODOS
-  int elegir_objeto_al_azar(void);
-  void quitar_objeto_de_contenedor(int);
-  void ordenar_objetos_segun_contenedor(vector<int>&); //borrar
+  // MÉTODOS //
+  // mover objetos //
+  inline int elegir_objeto_al_azar(void);
+  inline void quitar_objeto_de_contenedor(int);
   int buscar_objeto_que_encaje_en(int, int a_partir_de = 0); //hueco, posicion a buscar
   //devuelve el mayor objeto que encaja en un hueco
   void mover_objeto_antes_que_quepa(int);
   void mover_objeto_menos_espacio_deje(int);
+  // contenedores //
   void borrar_contenedores_vacios(void);
   inline bool cabe_en_contenedor(int, int); //objeto, contenedor
   inline int espacio_sobrante_contenedor(int);
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
   void reiniciar_contenedores(void);
-  //PILA
+  // Cola para la búsqueda tabú  //
+  void push_cola_tabu(int);
+  bool comp_no_esta_en_cola(int);
+  int TS_obj_azar(void);
+  // Pila de posiciones de objetos  //
   void ordenar_pila_mayor_menor(int = 0);
   void iniciar_pila_aleatoriamente(void);
   void iniciar_pila_mayor_menor(void);
   void iniciar_pila_sin_orden(void);
   int pop_pos(void);
-  int pop_pos_grasp(int);
+  int pop_pos_grasp(int);//Saca al azar entre las 7 primeras posiciones
 public:
-  bool distinta_solucion(INSTANCIA*);
-  int espacio_sobrante_total(void);
-  void TS(int = T);
+  // Heurísticas  //
+  void inicializar_cola_tabu(int);
+  void TS(void);
   void GRASP(int = T);
-  void LS_azar(void);
-  void LS_proximo_10(void);
   void LS(void);
+  // Comparación de instancias  //
+  int espacio_sobrante_total(void);
+  bool distinta_solucion(INSTANCIA*);
+  // introducir en contenedores //
   void antes_que_quepa(int = NO_ORDENAR);
   void menos_espacio_deje(int = NO_ORDENAR);
-  void ordenar_aleatoriamente(void);
-  void ordenar_menor_mayor(int = 0);
-  //inline void swap(int, int); //intercambia el primer objeto por el segundo
+  // get_ //
   inline int get_espacio_ocupado_en_contenedor(int);
   inline int get_objeto_en_contenedor(int);
   inline int get_num_contenedores(void);
@@ -79,8 +86,10 @@ public:
   inline int get_n_contenedores_optimo(void);
   inline int get_objeto(int);
   inline string get_nombre_instancia(void);
+  // imprimir //
   void imprimir_contenedores(void);
   void imprimir_objetos(int columnas = 9);
+  // constructores //
   void leer_fichero(ifstream&);
   void igualar(INSTANCIA*);
   INSTANCIA(INSTANCIA*); //Constructor de copia para LS

@@ -2,8 +2,6 @@
 int main(void)
 {
   char nombre_fichero[] = "BPP10.txt";
-  int inst;
-  int time;
   GRUPO_INSTANCIAS grupo_instancias(nombre_fichero);
   //grupo_instancias.mostrar_contenido_ficheros();
   //grupo_instancias.ordenar_mayor_menor(9);
@@ -21,8 +19,8 @@ int main(void)
 
   grupo_instancias.meter_antes_que_quepa(0, ORDEN_ALEATORIO);
 
-  for(int i = 0; i < 100; i++)
-  grupo_instancias.SA(0);
+  for(int i = 0; i < 1; i++)
+  grupo_instancias.TS(0);
   
   cout << "main" << endl;
   

@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                       private //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 mover objetos //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,14 +18,10 @@ void INSTANCIA::quitar_objeto_de_contenedor(int i)
     objeto_en_contenedor[i] = -1;
   }
 }
-void INSTANCIA::ordenar_objetos_segun_contenedor(vector<int>& auxiliar)
-{
-  cout << "No se usa ordenar objetos segun contenedor" << endl;
-}
 int INSTANCIA::buscar_objeto_que_encaje_en(int hueco, int a_partir_de/*= 0*/)
 {
   int encaja = -1, mayor_objeto_que_encaja = 0;
-  for(int i = a_partir_de; i < n_objetos; i++)//buscar objeto que quepa o que sea menor que el hueco
+  for(int i = a_partir_de; i < n_objetos; i++)//buscar objeto que quepa o sea menor que el hueco
   {
     if((objeto[i] <= hueco)&&(objeto[i] > mayor_objeto_que_encaja)) {
       encaja = i;
@@ -39,31 +34,26 @@ void INSTANCIA::mover_objeto_antes_que_quepa(int i)
 {
   unsigned pos_contenedor = 0;
   quitar_objeto_de_contenedor(i);
-  
-  //cout << "move" << endl;
-  
   while((pos_contenedor < contenedor.size())&&
         (cabe_en_contenedor(i, pos_contenedor) == false)) {
     pos_contenedor++;
   }
-  
-
-  
   if(pos_contenedor == contenedor.size())
     nuevo_contenedor(i);
   else
     meter_en_contenedor(i, pos_contenedor);
+  borrar_contenedores_vacios();
 }
 void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
 {
   int min_espacio = INF;
   int pos_contenedor = objeto_en_contenedor[i]; //Si no se pone así da error
   quitar_objeto_de_contenedor(i);
-  for(int j = 0; j < contenedor.size(); j++)
+  for(unsigned j = 0; j < contenedor.size(); j++)
   {
     if((cabe_en_contenedor(i, j) == true)&&(min_espacio > espacio_sobrante_contenedor(j))) {
       min_espacio = espacio_sobrante_contenedor(j);
-      pos_contenedor = j; //Problema, no pone el objeto donde debe
+      pos_contenedor = j;
     }
   }
   meter_en_contenedor(i, pos_contenedor);
@@ -74,10 +64,10 @@ void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void INSTANCIA::borrar_contenedores_vacios(void)
 {
-  for(int i = 0; i < contenedor.size(); i++)
+  for(unsigned i = 0; i < contenedor.size(); i++)
   {
     if(contenedor[i] == 0) {
-      contenedor.erase(contenedor.begin() + i); //Comprobar si borra bien
+      contenedor.erase(contenedor.begin() + i);
       i--;
     }
   }
@@ -85,13 +75,6 @@ void INSTANCIA::borrar_contenedores_vacios(void)
 bool INSTANCIA::cabe_en_contenedor(int i, int cont)
 {
   return espacio_sobrante_contenedor(cont) >= objeto[i] ? true : false;
-}
-int INSTANCIA::espacio_sobrante_total(void)
-{
-  int espacio_sobrante = 0;
-  for(int i = 0; i < contenedor.size(); i++)
-    espacio_sobrante += espacio_sobrante_contenedor(i) * espacio_sobrante_contenedor(i);
-  return espacio_sobrante;
 }
 int INSTANCIA::espacio_sobrante_contenedor(int cont)
 {
@@ -122,6 +105,40 @@ void INSTANCIA::reiniciar_contenedores(void)
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
     objeto_en_contenedor[i] = -1;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                   Cola para la búsqueda tabú  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::push_cola_tabu(int obj)
+{
+  cola_tabu.push_back(obj);
+  if(cola_tabu.size() > tam_cola_tabu)
+    cola_tabu.erase(cola_tabu.begin());
+}
+bool INSTANCIA::comp_no_esta_en_cola(int obj)
+{
+  unsigned i = 0;
+  bool r = false;
+  while((i < cola_tabu.size())&&(obj != cola_tabu[i]))
+    i++;
+  if(i == cola_tabu.size())
+    r = true;
+  else
+    r = false;
+  return r;
+}
+int INSTANCIA::TS_obj_azar(void)
+{
+  int obj, i = 0;
+  bool no_esta_en_cola = false;
+  while((no_esta_en_cola == false)&&(i < 100)) {
+    obj = rand() % n_objetos;
+    no_esta_en_cola = comp_no_esta_en_cola(obj);
+    i++;
+  }
+  if(no_esta_en_cola == true)
+    push_cola_tabu(obj);
+  return no_esta_en_cola == true ? obj : -1;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                Pila de posiciones de objetos  //
@@ -183,7 +200,7 @@ int INSTANCIA::pop_pos(void)
 int INSTANCIA::pop_pos_grasp(int t)
 {
   int pop, pos;
-  if(pila_sacar_objetos.size() >= t)
+  if(pila_sacar_objetos.size() >= (unsigned)t)
     pos = pila_sacar_objetos.size() - (rand() % t) - 1;
   else
     pos = rand() % pila_sacar_objetos.size();
@@ -194,19 +211,22 @@ int INSTANCIA::pop_pos_grasp(int t)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-bool INSTANCIA::distinta_solucion(INSTANCIA* p)
-{
-  int i = 0;
-  while((i < n_objetos)&&(objeto_en_contenedor[i] == p->get_objeto_en_contenedor(i)))
-    i++;
-  return i == n_objetos ? false : true;
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           TS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void INSTANCIA::TS(int t)
+void INSTANCIA::inicializar_cola_tabu(int t)
 {
-  
+  cola_tabu.clear();
+  tam_cola_tabu = t;
+}
+void INSTANCIA::TS(void)
+{
+  int obj;
+  obj = TS_obj_azar();
+  if(obj != -1)
+    mover_objeto_menos_espacio_deje(obj);
+  else
+    cout << "TS Error: no se encontró objeto que no esté en la cola tabú." << endl;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        GRASP  //
@@ -225,6 +245,23 @@ void INSTANCIA::LS(void)
 {
   int obj = rand() % n_objetos;
   mover_objeto_menos_espacio_deje(obj);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                    Comparación de instancias  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+int INSTANCIA::espacio_sobrante_total(void)
+{
+  int espacio_sobrante = 0;
+  for(unsigned i = 0; i < contenedor.size(); i++)
+    espacio_sobrante += espacio_sobrante_contenedor(i) * espacio_sobrante_contenedor(i);
+  return espacio_sobrante;
+}
+bool INSTANCIA::distinta_solucion(INSTANCIA* p)
+{
+  int i = 0;
+  while((i < n_objetos)&&(objeto_en_contenedor[i] == p->get_objeto_en_contenedor(i)))
+    i++;
+  return i == n_objetos ? false : true;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                    introducir en contenedores //
@@ -275,7 +312,7 @@ void INSTANCIA::menos_espacio_deje(int op)
     pos_objeto = pop_pos();
     min_espacio = INF;
     pos_contenedor = INF; //Si no cambia no se ha encontrado contenedor en el que quepa
-    for(int j = 0; j < contenedor.size(); j++)
+    for(unsigned j = 0; j < contenedor.size(); j++)
     {
       if((cabe_en_contenedor(pos_objeto, j) == true)
 	  &&(min_espacio > espacio_sobrante_contenedor(j))) {
@@ -334,7 +371,7 @@ void INSTANCIA::imprimir_contenedores(void)
     cout << "Contenedor [" << i << "] (" << espacio_sobrante_contenedor(i) << ")" << endl;
     cout << endl;
     for(int j = 0; j < n_objetos; j++)
-      if(objeto_en_contenedor[j] == i)
+      if(objeto_en_contenedor[j] == (int)i)
 	cout << objeto[j] << endl;
     cout << "---------------------" << endl;
   }
@@ -417,19 +454,20 @@ INSTANCIA::~INSTANCIA(void)
     delete objeto_en_contenedor;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                               GRUPO_INSTANCIA //
+//                                                                              GRUPO_INSTANCIAS //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            TS //
+//                                                                                 Búsqueda Tabú //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void GRUPO_INSTANCIAS::TS(int i, int t/*= 7*/)
 {
   INSTANCIA auxiliar(instancia[i]);
+  auxiliar.inicializar_cola_tabu(t);
   for(int j = 0; j < NUM_SOLUCIONES; j++)
   {
-    auxiliar.TS(t);
+    auxiliar.TS();
     if(auxiliar.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())
       instancia[i]->igualar(&auxiliar); 
   }
@@ -448,7 +486,7 @@ void GRUPO_INSTANCIAS::GRASP(int i, int t/*= 7*/)
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            SA //
+//                                                                           Simulated Annealing //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 float GRUPO_INSTANCIAS::Pr(float c, int delta)
 {
@@ -482,7 +520,7 @@ void GRUPO_INSTANCIAS::SA(int i, int op, float c, float alfa, int reducir_c/*= 7
     instancia[i]->igualar(&mejor_sol);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            LS //
+//                                                                                  Local Search //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void GRUPO_INSTANCIAS::ILS(int i, int op)
 {
