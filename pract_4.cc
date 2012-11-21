@@ -59,6 +59,23 @@ void INSTANCIA::mover_objeto_menos_espacio_deje(int i)
   meter_en_contenedor(i, pos_contenedor);
   borrar_contenedores_vacios();
 }
+void INSTANCIA::meter_objeto_menos_espacio_deje(int i)
+{
+  int min_espacio = INF;
+  int pos_contenedor = -1;
+  quitar_objeto_de_contenedor(i);
+  for(unsigned j = 0; j < contenedor.size(); j++)
+  {
+    if((cabe_en_contenedor(i, j) == true)&&(min_espacio > espacio_sobrante_contenedor(j))) {
+      min_espacio = espacio_sobrante_contenedor(j);
+      pos_contenedor = j;
+    }
+  }
+  if(pos_contenedor != -1) //si no se encuentra contenedor donde quepa
+    meter_en_contenedor(i, pos_contenedor);
+  else 
+    nuevo_contenedor(i);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                  contenedores //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,11 +117,92 @@ void INSTANCIA::meter_en_contenedor(int i, int cont)
     cout << endl;
   }
 }
+
 void INSTANCIA::reiniciar_contenedores(void)
 {
   contenedor.clear();
   for(int i = 0; i < n_objetos; i++)
     objeto_en_contenedor[i] = -1;
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                      Métodos privados del Algoritmo Genético  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::mutacion(void)
+{
+  int pos = ((int)poblacion.size() / 2) + (rand() % (int)poblacion.size() / 2);
+  poblacion[pos]->LS_azar();
+}
+void INSTANCIA::integridad_genetica(void)
+{
+  vector<int> posiciones_marcadas; //se marcan los objetos que no caben en los contenedores
+  for(int i = 0; i < n_objetos; i++)
+  {
+    if(cabe_en_contenedor(i, objeto_en_contenedor[i]) == true)
+      meter_en_contenedor(i, objeto_en_contenedor[i]);
+    else
+      posiciones_marcadas.push_back(i);//se marcan los objetos
+  }
+  for(unsigned i = 0; i < posiciones_marcadas.size(); i++)
+  { //se intenta meter los objetos que no cabían en los contenedores o se crea uno nuevo
+    meter_objeto_menos_espacio_deje(posiciones_marcadas.back());
+    posiciones_marcadas.pop_back();
+  }
+}
+void INSTANCIA::cruzar(int padre, int madre)
+{
+  int corte = rand() % n_objetos;
+  INSTANCIA* hijo1 = new INSTANCIA(poblacion[padre]);
+  INSTANCIA* hijo2 = new INSTANCIA(poblacion[madre]);
+  for(int i = 0; i < corte; i++)
+  {
+    hijo1->set_objeto_en_contenedor(i, poblacion[padre]->get_objeto_en_contenedor(i));
+    hijo2->set_objeto_en_contenedor(i, poblacion[madre]->get_objeto_en_contenedor(i));
+  }
+  for(int i = corte; i < n_objetos; i++)
+  {
+    hijo1->set_objeto_en_contenedor(i, poblacion[padre]->get_objeto_en_contenedor(i));
+    hijo2->set_objeto_en_contenedor(i, poblacion[madre]->get_objeto_en_contenedor(i));
+  }
+  hijo1->integridad_genetica();
+  hijo2->integridad_genetica();
+  //Si un hijo es mejor que algún padre, entra en la población
+  if((hijo1->espacio_sobrante_total() < poblacion[padre]->espacio_sobrante_total())||
+     (hijo1->espacio_sobrante_total() < poblacion[madre]->espacio_sobrante_total()))
+    poblacion.push_back(hijo1);
+  if((hijo2->espacio_sobrante_total() < poblacion[padre]->espacio_sobrante_total())||
+     (hijo2->espacio_sobrante_total() < poblacion[madre]->espacio_sobrante_total()))
+    poblacion.push_back(hijo2);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                Cola para la población del Algoritmo Genético  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::reproduccion(void)
+{
+  unsigned i = 0, j = 1;
+  while(j < poblacion.size()) {
+    cruzar(i, j);
+    i++;
+    j++;
+  }
+}
+void INSTANCIA::ordenar_poblacion(unsigned primero_desordenado)
+{
+  unsigned pos;
+  INSTANCIA* aux;  
+  if(primero_desordenado < poblacion.size()) {
+    pos = 0;
+    while(poblacion[primero_desordenado]->espacio_sobrante_total() > 
+          poblacion[pos]->espacio_sobrante_total())
+    //while(objeto[pila_sacar_objetos[primero_desordenado]] > objeto[pila_sacar_objetos[pos]])
+      pos++;
+    for(unsigned i = pos; i < primero_desordenado; i++)
+    {
+      aux = poblacion[i];
+      poblacion[i] = poblacion[primero_desordenado];
+      poblacion[primero_desordenado] = aux;
+    }
+    ordenar_poblacion(primero_desordenado + 1);
+  }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                   Cola para la búsqueda tabú  //
@@ -212,6 +310,38 @@ int INSTANCIA::pop_pos_grasp(int t)
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                            Algoritmo genético //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+unsigned INSTANCIA::media_poblacion(void)
+{
+  int suma = 0;
+  for(unsigned i = 0; i < poblacion.size(); i++)
+    suma += poblacion[i]->espacio_sobrante_total();
+  return suma / poblacion.size();
+}
+void INSTANCIA::inicializar_poblacion(int pob_inicial)
+{
+  for(int i = 0; i < pob_inicial; i++)
+  {
+    INSTANCIA *p = new INSTANCIA(this);
+    p->antes_que_quepa(ORDEN_ALEATORIO);
+    poblacion.push_back(p);
+  }
+  ordenar_poblacion();
+}
+void INSTANCIA::GA(int lim_pob)
+{
+  reproduccion();
+  ordenar_poblacion();
+  for(int aux = 0; aux < rand() % MAX_NUM_MUTACIONES; aux++)
+  {
+    mutacion();
+    ordenar_poblacion();
+  }
+  while(poblacion.size() > (unsigned)lim_pob)//se eliminan las peores soluciones
+    poblacion.pop_back();  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           TS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 void INSTANCIA::inicializar_cola_tabu(int t)
@@ -241,6 +371,23 @@ void INSTANCIA::GRASP(int t)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           LS  //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::LS_azar(void)
+{
+  int obj, cont, j = 0;
+  for(int i = 0; i < MAX_LS_AZAR; i++)
+  {
+    j = 0;
+    do {
+      j++;
+      obj = rand() % n_objetos;
+      cont = rand() % (int)contenedor.size();
+    }while((cabe_en_contenedor(obj, cont) == false)&&(j < 10));
+    if(cabe_en_contenedor(obj, cont) == true) {
+      quitar_objeto_de_contenedor(obj);
+      meter_en_contenedor(obj, cont);
+    }
+  }
+}
 void INSTANCIA::LS(void)
 {
   int obj = rand() % n_objetos;
@@ -327,11 +474,15 @@ void INSTANCIA::menos_espacio_deje(int op)
   }
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                          get_ //
+//                                                                                   get_ y set_ //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 int INSTANCIA::get_espacio_ocupado_en_contenedor(int i)
 {
   return contenedor[i];
+}
+void INSTANCIA::set_objeto_en_contenedor(int i, int c)
+{
+  objeto_en_contenedor[i] = c;
 }
 int INSTANCIA::get_objeto_en_contenedor(int i)
 {
@@ -458,6 +609,33 @@ INSTANCIA::~INSTANCIA(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                            Algoritmo genético //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+bool GRUPO_INSTANCIAS::poblacion_estancada(unsigned& a, unsigned& b)
+{
+  bool r = true;
+  if(a != b)
+    r = false;
+  return r;
+}
+void GRUPO_INSTANCIAS::GA(int i, int pob_inicial, int lim_pob)
+{
+  int j = 0, medias_repetidas = 0;
+  unsigned media_poblacion_anterior, media_poblacion_actual = INF;
+  instancia[i]->inicializar_poblacion(pob_inicial);
+  while((j < NUM_SOLUCIONES)&&(medias_repetidas < UMBRAL_MEDIAS_REPETIDAS))
+  {
+    media_poblacion_anterior = media_poblacion_actual;
+    instancia[i]->GA(lim_pob);
+    media_poblacion_actual = instancia[i]->media_poblacion();
+    if(poblacion_estancada(media_poblacion_anterior, media_poblacion_actual) == true)
+      medias_repetidas++;
+    else
+      medias_repetidas = 0;
+    j++;
+  }
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 Búsqueda Tabú //
 ///////////////////////////////////////////////////////////////////////////////////////////////////

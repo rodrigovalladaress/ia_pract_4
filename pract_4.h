@@ -9,21 +9,18 @@
 #define ORDEN_ALEATORIO 0
 #define ORDEN_MAYOR_MENOR 1
 #define NO_ORDENAR 3
-#define REARRANCAR true
-#define NUM_SOLUCIONES 20
+#define NUM_SOLUCIONES 100
 #define MAX_VECINAS_LS 100
-#define MAX_VECINAS_SA 100 //BORRAR
 #define MENOS_ESPACIO_DEJE 0
-#define PROXIMO_10 1
-#define SWAP_AZAR 2
-#define MAX_ILS 10
-#define LOCAL_ITERADA 0
-#define MULTI_ARRANQUE 1
 #define REDUCIR_C 7
 #define LCR_SIZE 7
 #define TABU_SIZE 7
-#define K_MAX 7
 #define T 7
+#define POBLACION_INICIAL 5
+#define LIMITE_POBLACION 10
+#define MAX_NUM_MUTACIONES 5
+#define UMBRAL_MEDIAS_REPETIDAS 10
+#define MAX_LS_AZAR 10
 using namespace std;
 class INSTANCIA
 {
@@ -33,6 +30,7 @@ private:
   int capacidad;
   int n_contenedores_optimo;
   unsigned tam_cola_tabu;
+  vector<INSTANCIA*> poblacion;
   vector<int> cola_tabu;
   vector<int> pila_sacar_objetos;
   vector<int> objeto; //El orden de los objetos permanece constante
@@ -47,6 +45,7 @@ private:
   //devuelve el mayor objeto que encaja en un hueco
   void mover_objeto_antes_que_quepa(int);
   void mover_objeto_menos_espacio_deje(int);
+  void meter_objeto_menos_espacio_deje(int);
   // contenedores //
   void borrar_contenedores_vacios(void);
   inline bool cabe_en_contenedor(int, int); //objeto, contenedor
@@ -54,6 +53,13 @@ private:
   inline void nuevo_contenedor(int);
   inline void meter_en_contenedor(int, int); //objeto, contenedor
   void reiniciar_contenedores(void);
+  // Métodos privados del Algoritmo Genético //
+  void mutacion(void);
+  void integridad_genetica(void);
+  void cruzar(int, int);
+  void reproduccion(void);
+  // Cola para la población del Algoritmo Genético //
+  void ordenar_poblacion(unsigned = 0);
   // Cola para la búsqueda tabú  //
   void push_cola_tabu(int);
   bool comp_no_esta_en_cola(int);
@@ -67,9 +73,14 @@ private:
   int pop_pos_grasp(int);//Saca al azar entre las 7 primeras posiciones
 public:
   // Heurísticas  //
+  unsigned media_poblacion(void);
+  
+  void inicializar_poblacion(int);
+  void GA(int);
   void inicializar_cola_tabu(int);
   void TS(void);
   void GRASP(int = T);
+  void LS_azar(void);
   void LS(void);
   // Comparación de instancias  //
   int espacio_sobrante_total(void);
@@ -80,6 +91,7 @@ public:
   // get_ //
   inline int get_espacio_ocupado_en_contenedor(int);
   inline int get_objeto_en_contenedor(int);
+  inline void set_objeto_en_contenedor(int, int);
   inline int get_num_contenedores(void);
   inline int get_n_objetos(void);
   inline int get_capacidad(void);
@@ -102,11 +114,14 @@ private:
   int n_casos;
   INSTANCIA** instancia; //array de punteros a instancia
 public:
+  bool poblacion_estancada(unsigned&, unsigned&);
+  void GA(int, int = POBLACION_INICIAL, int = LIMITE_POBLACION);
+  //dos opciones, limite poblacion = 10 y límite = 20
   void TS(int, int = T); //dos opciones, t = 7 o t = 10
   float Pr(float, int);
   void GRASP(int, int = T); //dos opciones, t = 7 o t = 10
   void SA(int, int = MENOS_ESPACIO_DEJE, float = 1, float = 0.9, int = REDUCIR_C); 
-  //dos opciones, reducir c cada 7 o 10 itera
+  //dos opciones, reducir c cada 7 o 10 iteraciones
   void ILS(int, int = NO_ORDENAR); //dos opciones mayor menor o aleatorio
   void LS(int, int = 0);
   inline void meter_antes_que_quepa(int, int = NO_ORDENAR);

@@ -18,9 +18,7 @@ int main(void)
   
 
   grupo_instancias.meter_antes_que_quepa(0, ORDEN_ALEATORIO);
-
-  for(int i = 0; i < 1; i++)
-  grupo_instancias.TS(0);
+  grupo_instancias.GA(0);
   
   cout << "main" << endl;
   
