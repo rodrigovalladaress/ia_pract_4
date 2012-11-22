@@ -312,6 +312,14 @@ int INSTANCIA::pop_pos_grasp(int t)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                            Algoritmo genético //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+INSTANCIA* INSTANCIA::mejor_individuo(void)
+{
+  return poblacion[0];
+}
+void INSTANCIA::destruir_poblacion(void)
+{
+  poblacion.clear();
+}
 unsigned INSTANCIA::media_poblacion(void)
 {
   int suma = 0;
@@ -340,6 +348,37 @@ void INSTANCIA::GA(int lim_pob)
   }
   while(poblacion.size() > (unsigned)lim_pob)//se eliminan las peores soluciones
     poblacion.pop_back();  
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                          VNS  //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+void INSTANCIA::agitar(int k)
+{
+  int obj, cont;
+  unsigned contador;
+  bool movido_objeto = false;
+  for(int i = 0; i < k; i++)
+  {
+    contador = 0; //evita que se vuelvan a comparar los contenedores del principio
+    obj = rand() % n_objetos;
+    cont = rand() % contenedor.size();
+    do {
+      if(cabe_en_contenedor(obj, cont)) {
+	quitar_objeto_de_contenedor(obj);
+	meter_en_contenedor(obj, cont);
+	movido_objeto = true;
+      }
+      else {//comprobar uno a uno si cabe en un contenedor desde el cont al azar del principio
+	cont++;
+	cont = cont % contenedor.size();
+	contador++;
+      }
+    }while((movido_objeto == false)&&(contador < contenedor.size()));
+  }
+}
+void INSTANCIA::VNS(void)
+{
+  
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                           TS  //
@@ -609,6 +648,118 @@ INSTANCIA::~INSTANCIA(void)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                        public //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+void GRUPO_INSTANCIAS::llamar_heuristicas(int heuristica)
+{
+  long long tiempo;
+  float media_tiempo = 0, diferencia_optima = 0;
+  int veces_optima = 0;
+  switch(heuristica)
+  {
+    case 0: 
+      cout << "ILS\t";
+      break;
+    case 1:
+      cout << "ILS2\t";
+      break;
+    case 2:
+      cout << "SA\t";
+      break;
+    case 3:
+      cout << "SA2\t";
+      break;
+    case 4:
+      cout << "GA\t";
+      break;
+    case 5: 
+      cout << "GA2\t";
+      break;
+    case 6:
+      cout << "GRASP\t";
+      break;
+    case 7:
+      cout << "GRASP2\t";
+      break;
+    case 8:
+      cout << "TS\t";
+      break;
+    case 9:
+      cout << "TS2\t";
+      break;
+    case 10:
+      cout << "VNS\t";
+      break;
+    case 11:
+      cout << "VNS2\t";
+      break;
+  }
+  for(int i = 0; i < n_casos; i++)
+  {
+    meter_antes_que_quepa(i, ORDEN_MAYOR_MENOR);
+    cronousec(1);
+    switch(heuristica)
+    {
+      case 0: 
+        ILS(i, ORDEN_ALEATORIO);
+        break;
+      case 1:
+        ILS(i, ORDEN_MAYOR_MENOR);
+        break;
+      case 2:
+        SA(i);
+        break;
+      case 3:
+        SA(i, MENOS_ESPACIO_DEJE, 1, 0.9, 10);
+        break;
+      case 4:
+        GA(i);
+        break;
+      case 5: 
+        GA(i, 20, 20);
+        break;
+      case 6:
+        GRASP(i);
+        break;
+      case 7:
+        GRASP(i, 10);
+        break;
+      case 8:
+        TS(i);
+        break;
+      case 9:
+        TS(i, 10);
+        break;
+      case 10:
+        VNS(i);
+        break;
+      case 11:
+        VNS(i, 10);
+        break;
+    }
+    tiempo = cronousec(0);
+    media_tiempo += tiempo;
+    if(instancia[i]->get_num_contenedores() == instancia[i]->get_n_contenedores_optimo())
+      veces_optima++;
+    else
+      diferencia_optima += instancia[i]->get_num_contenedores() - 
+                           instancia[i]->get_n_contenedores_optimo();
+    cout << tiempo << "\t";
+  }
+  cout << media_tiempo / n_casos << "   \t" << veces_optima << "\t\t";
+  cout << diferencia_optima / (float)n_casos << endl;
+}
+void GRUPO_INSTANCIAS::estadistica(void)
+{
+  cout << "   \t"; 
+  for(int i = 0; i < n_casos; i++)
+    cout << instancia[i]->get_nombre_instancia() << "\t";
+  // Media de los tiempos, número de veces que alcanza la solución óptima y la diferencia de 
+  // contenedores media  de las soluciones con el número de contenedores óptimo
+  cout << "Media   \tV.óptima\tDiferencia con óptima" << endl;
+  for(int heuristica = 0; heuristica < NUM_HEURISTICAS; heuristica++)
+    llamar_heuristicas(heuristica);
+  cout << endl;
+  cout << "(Tiempo en µs)" << endl;
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                            Algoritmo genético //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -624,7 +775,7 @@ void GRUPO_INSTANCIAS::GA(int i, int pob_inicial, int lim_pob)
   int j = 0, medias_repetidas = 0;
   unsigned media_poblacion_anterior, media_poblacion_actual = INF;
   instancia[i]->inicializar_poblacion(pob_inicial);
-  while((j < NUM_SOLUCIONES)&&(medias_repetidas < UMBRAL_MEDIAS_REPETIDAS))
+  while((j < NUM_SOLUCIONES / pob_inicial)&&(medias_repetidas < UMBRAL_MEDIAS_REPETIDAS))
   {
     media_poblacion_anterior = media_poblacion_actual;
     instancia[i]->GA(lim_pob);
@@ -633,6 +784,27 @@ void GRUPO_INSTANCIAS::GA(int i, int pob_inicial, int lim_pob)
       medias_repetidas++;
     else
       medias_repetidas = 0;
+    j++;
+  }
+  if(instancia[i]->mejor_individuo()->espacio_sobrante_total() < 
+     instancia[i]->espacio_sobrante_total())
+    instancia[i]->igualar(instancia[i]->mejor_individuo());
+  instancia[i]->destruir_poblacion();
+}
+void GRUPO_INSTANCIAS::VNS(int i, int k_max)
+{
+  int k = 1, j = 0;
+  INSTANCIA* sol_vecina;
+  sol_vecina = new INSTANCIA(instancia[i]);
+  while((k < k_max)&&(j < NUM_SOLUCIONES)) {
+    sol_vecina->agitar(k);
+    sol_vecina->LS();
+    if(sol_vecina->espacio_sobrante_total() < instancia[i]->espacio_sobrante_total()) {
+      instancia[i]->igualar(sol_vecina);
+      k++;
+    }
+    else
+      k = 1;
     j++;
   }
 }
@@ -679,10 +851,9 @@ void GRUPO_INSTANCIAS::SA(int i, int op, float c, float alfa, int reducir_c/*= 7
   int max_vecinas = 0, contador = 0;
   float rand_f;
   while(max_vecinas < NUM_SOLUCIONES) {
-    
     //sol_vecina.antes_que_quepa(op);
     sol_vecina.LS(); // da error
-    rand_f = (float)rand()/(float)RAND_MAX;
+    rand_f = fmod((float)rand(), (float)1.0);
     if(Pr(c, sol_actual.espacio_sobrante_total() - sol_vecina.espacio_sobrante_total()) > rand_f)
       sol_actual.igualar(&sol_vecina);
     if(sol_actual.espacio_sobrante_total() < mejor_sol.espacio_sobrante_total())
@@ -713,11 +884,8 @@ void GRUPO_INSTANCIAS::ILS(int i, int op)
     } while(p.espacio_sobrante_total() > instancia[i]->espacio_sobrante_total()
            &&(max_vecinas < MAX_VECINAS_LS));
     if((p.get_num_contenedores() < instancia[i]->get_num_contenedores())
-      ||(p.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total())) {
-      cout << "Mejor vecina, de " << instancia[i]->get_num_contenedores()  << " a ";
-      cout << p.get_num_contenedores() << endl;
+      ||(p.espacio_sobrante_total() < instancia[i]->espacio_sobrante_total()))
       instancia[i]->igualar(&p);
-    }
   }
 }
 void GRUPO_INSTANCIAS::LS(int i, int op/*= false*/)
@@ -784,7 +952,7 @@ GRUPO_INSTANCIAS::GRUPO_INSTANCIAS(char *nombre_fichero)
   else {
     flujo >> n_casos;
     instancia = new INSTANCIA*[n_casos];
-    cout << "n_casos = " << n_casos << endl << endl;
+    cout << "n_casos = " << n_casos << endl;
     for(int i = 0; i < n_casos; i++) { //pasar el flujo a cada constructor de instancia
       instancia[i] = new INSTANCIA/*[n_casos]*/;
       instancia[i]->leer_fichero(flujo);

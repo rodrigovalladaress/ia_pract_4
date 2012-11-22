@@ -16,11 +16,13 @@
 #define LCR_SIZE 7
 #define TABU_SIZE 7
 #define T 7
-#define POBLACION_INICIAL 5
+#define POBLACION_INICIAL 10
 #define LIMITE_POBLACION 10
 #define MAX_NUM_MUTACIONES 5
 #define UMBRAL_MEDIAS_REPETIDAS 10
 #define MAX_LS_AZAR 10
+#define K_MAX 7
+#define NUM_HEURISTICAS 12
 using namespace std;
 class INSTANCIA
 {
@@ -33,7 +35,7 @@ private:
   vector<INSTANCIA*> poblacion;
   vector<int> cola_tabu;
   vector<int> pila_sacar_objetos;
-  vector<int> objeto; //El orden de los objetos permanece constante
+  vector<int> objeto;
   int* objeto_en_contenedor;
   string nombre_instancia;
   vector<int> contenedor;
@@ -72,11 +74,14 @@ private:
   int pop_pos(void);
   int pop_pos_grasp(int);//Saca al azar entre las 7 primeras posiciones
 public:
-  // Heurísticas  //
+  // Heurísticas  y métodos públicos asociados //
+  INSTANCIA* mejor_individuo(void);
+  void destruir_poblacion(void);
   unsigned media_poblacion(void);
-  
   void inicializar_poblacion(int);
   void GA(int);
+  void agitar(int);
+  void VNS(void);
   void inicializar_cola_tabu(int);
   void TS(void);
   void GRASP(int = T);
@@ -114,9 +119,12 @@ private:
   int n_casos;
   INSTANCIA** instancia; //array de punteros a instancia
 public:
+  void llamar_heuristicas(int);
+  void estadistica(void);
   bool poblacion_estancada(unsigned&, unsigned&);
   void GA(int, int = POBLACION_INICIAL, int = LIMITE_POBLACION);
   //dos opciones, limite poblacion = 10 y límite = 20
+  void VNS(int, int = K_MAX); //dos opciones, k_max = 7 o k_max = 10
   void TS(int, int = T); //dos opciones, t = 7 o t = 10
   float Pr(float, int);
   void GRASP(int, int = T); //dos opciones, t = 7 o t = 10
